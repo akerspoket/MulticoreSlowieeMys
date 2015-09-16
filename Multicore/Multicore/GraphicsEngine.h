@@ -65,6 +65,7 @@ public:
 	ID3D11Device *dev;                   
 	ID3D11DeviceContext *devcon;         
 	ID3D11RenderTargetView *backbuffer;  
+	
 	ID3D11Texture2D *mDepthBuffer;
 	ID3D11DepthStencilView *mDepthView;
 
@@ -81,7 +82,7 @@ public:
 
 
 private:
-	enum ShaderType { VertexShader, PixelShader };
+	enum ShaderType { VertexShader, PixelShader, ComputeShader };
 	bool CreateShader(ShaderType pType, void* oShaderHandle, LPCWSTR pShaderFileName, LPCSTR pEntryPoint, ID3D11InputLayout** oInputLayout, D3D11_INPUT_ELEMENT_DESC pInputDescription[]);
 	bool SetActiveShader(ShaderType pType, void* oShaderHandle);
 	int CreateBuffer(D3D11_BUFFER_DESC pBufferDescription);
@@ -89,6 +90,7 @@ private:
 	bool PushToDevice(int pBufferID, void* pDataStart, unsigned int pSize, unsigned int pRegister, ShaderType pType);
 
 	//Variables
+	ID3D11ComputeShader* mComputeShader;
 	ID3D11PixelShader* mPixelShader;
 	VertexShaderComponents* mVertexShader = new VertexShaderComponents;
 	vector< ID3D11Buffer*> mBuffers; //int id
@@ -102,8 +104,9 @@ private:
 	};
 	ConstantBufferType mWVPBufferID;
 	ConstantBufferType mInstanceBufferID;
-
-
+	ID3D11UnorderedAccessView* mBackBufferUAV;
+	ID3D11UnorderedAccessView* mVertexBuffer;
+	
 	ID3D11ShaderResourceView* mCubesTexture;
 	ID3D11SamplerState* mCubesTexSamplerState;
 };
