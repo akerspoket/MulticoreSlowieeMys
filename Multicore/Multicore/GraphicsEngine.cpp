@@ -50,7 +50,7 @@ void GraphicsEngine::InitD3D(HWND hWnd)
 
 	ID3D11Texture2D *pBackBuffer;
 	swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-	dev->CreateUnorderedAccessView(pBackBuffer, NULL, &mBackBufferUAV);
+	HRESULT res = dev->CreateUnorderedAccessView(pBackBuffer, NULL, &mBackBufferUAV);
 	pBackBuffer->Release();
 
 
@@ -90,41 +90,57 @@ void GraphicsEngine::InitGraphics()
 		{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f},
 		{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f},
 
-		{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f }, //4
-		{ -0.5f, -0.5, 0.5f, 1.0f, 1.0f }, //5  Baksidan
-		{ 0.5f, -0.5f, 0.5f, 0.0f, 1.0f }, //6
-		{ 0.5f, 0.5f, 0.5f, 0.0f, 0.0f },  //7
+		//{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f }, //4
+		//{ -0.5f, -0.5, 0.5f, 1.0f, 1.0f }, //5  Baksidan
+		//{ 0.5f, -0.5f, 0.5f, 0.0f, 1.0f }, //6
+		//{ 0.5f, 0.5f, 0.5f, 0.0f, 0.0f },  //7
 
 
-		{ -0.5f, 0.5f, -0.5f, 0.0f,0.0f},  //ovanpå 8
-		{ -0.5f, 0.5, 0.5f, 0.0f, 1.0f},   //// 9
-		{ 0.5f, 0.5f, 0.5f, 1.0f, 1.0f},   ////10
-		{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f },  //11
+		//{ -0.5f, 0.5f, -0.5f, 0.0f,0.0f},  //ovanpå 8
+		//{ -0.5f, 0.5, 0.5f, 0.0f, 1.0f},   //// 9
+		//{ 0.5f, 0.5f, 0.5f, 1.0f, 1.0f},   ////10
+		//{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f },  //11
 
-		{ -0.5f, -0.5f, 0.5f, 0.0f,0.0f},  //under 12
-		{ -0.5f, -0.5, -0.5f, 0.0f, 1.0f },   //// 13
-		{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f },   ////14
-		{ 0.5f, -0.5f, 0.5f, 1.0f, 0.0f },  //15
+		//{ -0.5f, -0.5f, 0.5f, 0.0f,0.0f},  //under 12
+		//{ -0.5f, -0.5, -0.5f, 0.0f, 1.0f },   //// 13
+		//{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f },   ////14
+		//{ 0.5f, -0.5f, 0.5f, 1.0f, 0.0f },  //15
 
-		{ -0.5f, 0.5f, -0.5f, 0.0f,0.0f},  //vänster 16
-		{ -0.5f, -0.5, -0.5f, 0.0f, 1.0f },   //// 17
-		{ -0.5f, -0.5f, 0.5f, 1.0f, 1.0f },   ////18
-		{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f },  //19
+		//{ -0.5f, 0.5f, -0.5f, 0.0f,0.0f},  //vänster 16
+		//{ -0.5f, -0.5, -0.5f, 0.0f, 1.0f },   //// 17
+		//{ -0.5f, -0.5f, 0.5f, 1.0f, 1.0f },   ////18
+		//{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f },  //19
 
-		{ 0.5f, 0.5f, 0.5f, 0.0f,0.0f },  //höger 20
-		{ 0.5f, -0.5, 0.5f, 0.0f, 1.0f },   //// 21
-		{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f },   ////22
-		{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f },  //23
+		//{ 0.5f, 0.5f, 0.5f, 0.0f,0.0f },  //höger 20
+		//{ 0.5f, -0.5, 0.5f, 0.0f, 1.0f },   //// 21
+		//{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f },   ////22
+		//{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f },  //23
 	};
+	ID3D11Buffer* tVB;
+	D3D11_BUFFER_DESC vbd;
+	ZeroMemory(&vbd, sizeof(vbd));
+	//vbd.Usage = D3D11_USAGE_DYNAMIC;
+	vbd.ByteWidth = sizeof(OurVertices);
+	vbd.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	//vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	vbd.StructureByteStride = sizeof(Vertex);
 
+	int tVbufferHandle = CreateBuffer(vbd, &OurVertices);
+	//PushToDevice(tVbufferHandle, &OurVertices, sizeof(OurVertices));
+	D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	
+	HRESULT res = dev->CreateUnorderedAccessView(mBuffers[tVbufferHandle], NULL, &mVertexBufferUAV);
+	mBuffers[tVbufferHandle]->Release();
 }
 
 void GraphicsEngine::RenderFrame(void)
 {
 	float color[] = {0.0f,0.2f,0.4f,1.0f};
 	
-	ID3D11UnorderedAccessView* uav[] = { mBackBufferUAV };
-	devcon->CSSetUnorderedAccessViews(0, 1, uav, NULL);
+	ID3D11UnorderedAccessView* uav[] = { mBackBufferUAV, mVertexBufferUAV };
+	devcon->CSSetUnorderedAccessViews(0, 2, uav, NULL);
 
 	SetActiveShader(ComputeShader, mComputeShader);
 	devcon->Dispatch(25, 20, 1);
@@ -190,10 +206,12 @@ bool GraphicsEngine::SetActiveShader(ShaderType pType, void* oShaderHandle)
 	return true;
 }
 
-int GraphicsEngine::CreateBuffer(D3D11_BUFFER_DESC pBufferDescription)
+int GraphicsEngine::CreateBuffer(D3D11_BUFFER_DESC pBufferDescription, void* pInitialData)
 {
 	ID3D11Buffer* tHolder;
-	HRESULT res = dev->CreateBuffer(&pBufferDescription, NULL, &tHolder);
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = pInitialData;
+	HRESULT res = dev->CreateBuffer(&pBufferDescription, &InitData, &tHolder);
 	if (res != S_OK)
 	{
 		return -1;

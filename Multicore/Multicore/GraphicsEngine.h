@@ -25,7 +25,7 @@ using namespace std;
 struct Vertex
 {
 	float x, y, z;
-	float color[4];
+	float texcoord[2];
 };
 
 struct MatrixBufferType
@@ -85,7 +85,7 @@ private:
 	enum ShaderType { VertexShader, PixelShader, ComputeShader };
 	bool CreateShader(ShaderType pType, void* oShaderHandle, LPCWSTR pShaderFileName, LPCSTR pEntryPoint, ID3D11InputLayout** oInputLayout, D3D11_INPUT_ELEMENT_DESC pInputDescription[]);
 	bool SetActiveShader(ShaderType pType, void* oShaderHandle);
-	int CreateBuffer(D3D11_BUFFER_DESC pBufferDescription);
+	int CreateBuffer(D3D11_BUFFER_DESC pBufferDescription, void* pInitialData);
 	bool PushToDevice(int pBufferID, void* pDataStart, unsigned int pSize);
 	bool PushToDevice(int pBufferID, void* pDataStart, unsigned int pSize, unsigned int pRegister, ShaderType pType);
 
@@ -105,7 +105,7 @@ private:
 	ConstantBufferType mWVPBufferID;
 	ConstantBufferType mInstanceBufferID;
 	ID3D11UnorderedAccessView* mBackBufferUAV;
-	ID3D11UnorderedAccessView* mVertexBuffer;
+	ID3D11UnorderedAccessView* mVertexBufferUAV;
 	
 	ID3D11ShaderResourceView* mCubesTexture;
 	ID3D11SamplerState* mCubesTexSamplerState;
