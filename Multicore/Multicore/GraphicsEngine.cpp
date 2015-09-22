@@ -6,6 +6,7 @@ GraphicsEngine::GraphicsEngine()
 {
 	mWVPBufferID.reg = 0;
 	mInstanceBufferID.reg = 2;
+	mCamerManager = new CameraManager();
 }
 
 
@@ -23,8 +24,8 @@ void GraphicsEngine::InitD3D(HWND hWnd)
 
 	// fill the swap chain description struct
 	scd.BufferCount = 1;
-	scd.BufferDesc.Width = 800;
-	scd.BufferDesc.Height = 600;
+	scd.BufferDesc.Width = SCREEN_WIDTH;
+	scd.BufferDesc.Height = SCREEN_HEIGHT;
 	scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	scd.BufferDesc.RefreshRate.Numerator = 60;
 	scd.BufferDesc.RefreshRate.Denominator = 1;
@@ -38,7 +39,7 @@ void GraphicsEngine::InitD3D(HWND hWnd)
 	D3D11CreateDeviceAndSwapChain(NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		NULL,
+		D3D11_CREATE_DEVICE_DEBUG,
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,
@@ -116,6 +117,7 @@ void GraphicsEngine::InitGraphics()
 		//{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f },   ////22
 		//{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f },  //23
 	};
+	//FOR VERTEX BUFFER
 	ID3D11Buffer* tVB;
 	D3D11_BUFFER_DESC vbd;
 	ZeroMemory(&vbd, sizeof(vbd));
@@ -125,26 +127,64 @@ void GraphicsEngine::InitGraphics()
 	//vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	vbd.StructureByteStride = sizeof(Vertex);
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = OurVertices;
+	HRESULT res = dev->CreateBuffer(&vbd, &InitData, &mVertexBufferID);
 
-	int tVbufferHandle = CreateBuffer(vbd, &OurVertices);
-	//PushToDevice(tVbufferHandle, &OurVertices, sizeof(OurVertices));
-	D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
-	ZeroMemory(&desc, sizeof(desc));
 	
-	HRESULT res = dev->CreateUnorderedAccessView(mBuffers[tVbufferHandle], NULL, &mVertexBufferUAV);
-	mBuffers[tVbufferHandle]->Release();
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC rvDesc;
+	ZeroMemory(&rvDesc, sizeof(rvDesc));
+	rvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+	rvDesc.BufferEx.FirstElement = 0;
+	rvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	rvDesc.BufferEx.NumElements = vbd.ByteWidth / vbd.StructureByteStride;
+	res = dev->CreateShaderResourceView(mVertexBufferID, &rvDesc, &mResourceView);
+	//mBuffers[tVbufferHandle]->Release();
+
+	//FOR MATRIX BUFFER
+	ZeroMemory(&vbd, sizeof(vbd));
+	vbd.Usage = D3D11_USAGE_DYNAMIC;
+	vbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	vbd.ByteWidth = sizeof(XMFLOAT4X4);
+	
+	ID3D11Buffer* tHolder;
+
+	res = dev->CreateBuffer(&vbd, NULL, &tHolder);
+	if (res != S_OK)
+	{
+		return;
+	}
+	mBuffers.push_back(tHolder);
+	mWVPBufferID.bufferID = mBuffers.size() - 1;
+}
+
+void GraphicsEngine::Update(float pDT, UserCMD pUserCMD)
+{
+	mCamerManager->HandleUserCMD(pDT,pUserCMD);
+	mCamerManager->UpdateCamera();
 }
 
 void GraphicsEngine::RenderFrame(void)
 {
 	float color[] = {0.0f,0.2f,0.4f,1.0f};
-	
-	ID3D11UnorderedAccessView* uav[] = { mBackBufferUAV, mVertexBufferUAV };
-	devcon->CSSetUnorderedAccessViews(0, 2, uav, NULL);
-
 	SetActiveShader(ComputeShader, mComputeShader);
-	devcon->Dispatch(25, 20, 1);
+	ID3D11ShaderResourceView* tRViews[] = { mResourceView };
+	int s = ARRAYSIZE(tRViews);
+	devcon->CSSetShaderResources(0, ARRAYSIZE(tRViews), tRViews);
+
+	ID3D11UnorderedAccessView* uav[] = { mBackBufferUAV };
+	devcon->CSSetUnorderedAccessViews(0, ARRAYSIZE(uav), uav, NULL);
+	XMFLOAT4X4 tCameraMVP = mCamerManager->GetWVP();
+	PushToDevice(mWVPBufferID.bufferID, &tCameraMVP, sizeof(tCameraMVP),mWVPBufferID.reg, ComputeShader);
+
+	devcon->Dispatch(25, 25, 1);
 	SetActiveShader(ComputeShader, nullptr);
+	ID3D11ShaderResourceView* tRemoveRViews[] = { nullptr };
+	devcon->CSSetShaderResources(0, ARRAYSIZE(tRemoveRViews), tRemoveRViews);
+	ID3D11UnorderedAccessView* tRemoveUAV[] = { nullptr };
+	devcon->CSSetUnorderedAccessViews(0, ARRAYSIZE(tRemoveUAV), tRemoveUAV, NULL);
 	swapchain->Present(0, 0);
 }
 
@@ -260,6 +300,11 @@ bool GraphicsEngine::PushToDevice(int pBufferID, void* pDataStart, unsigned int 
 		devcon->PSSetConstantBuffers(pRegister, 1, &mBuffers.at(pBufferID));
 	}
 		break;
+	case GraphicsEngine::ComputeShader:
+	{
+		devcon->CSSetConstantBuffers(pRegister, 1, &mBuffers.at(pBufferID));
+	}
+	break;
 	default:
 		break;
 	}

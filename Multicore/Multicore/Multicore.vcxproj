@@ -81,15 +81,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="InputSystem.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="WindowCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CameraManager.h" />
     <ClInclude Include="DDSTextureLoader.h" />
+    <ClInclude Include="Globals.h" />
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="InputSystem.h" />
+    <ClInclude Include="WindowCreator.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="ComputeShader.hlsl">

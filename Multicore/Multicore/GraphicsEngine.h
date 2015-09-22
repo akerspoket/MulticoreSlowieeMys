@@ -12,6 +12,8 @@
 #include <d3dcompiler.h>
 #include <vector>
 #include "DDSTextureLoader.h"
+#include "Globals.h"
+#include "CameraManager.h"
 
 #ifdef DEBUG
 	#include <iostream>
@@ -79,6 +81,7 @@ public:
 	void CleanD3D(void);         // close
 	void RenderFrame(void);
 	void InitGraphics();
+	void Update(float pDT, UserCMD pUserCMD);
 
 
 private:
@@ -95,17 +98,24 @@ private:
 	VertexShaderComponents* mVertexShader = new VertexShaderComponents;
 	vector< ID3D11Buffer*> mBuffers; //int id
 	MatrixBufferType tBufferInfo;
-	int mVertexBufferID;
+
+	CameraManager* mCamerManager;
 	int mIndexBufferID;
 	struct ConstantBufferType
 	{
 		int bufferID;
 		int reg;
-	};
+	};	
+
 	ConstantBufferType mWVPBufferID;
 	ConstantBufferType mInstanceBufferID;
+	ID3D11Buffer* mMatrixBuffer;
+	ID3D11Buffer* mVertexBufferID;
 	ID3D11UnorderedAccessView* mBackBufferUAV;
 	ID3D11UnorderedAccessView* mVertexBufferUAV;
+	ID3D11UnorderedAccessView* mMatrixBufferUAV;
+	ID3D11ShaderResourceView* mResourceView;
+	ID3D11ShaderResourceView* mMatrixResourceView;
 	
 	ID3D11ShaderResourceView* mCubesTexture;
 	ID3D11SamplerState* mCubesTexSamplerState;
