@@ -9,5 +9,5 @@ SamplerState ObjSamplerState : register(s0);
 
 float4 PShader(PixelInputType input) : SV_TARGET
 {
-	return ObjTexture.Sample( ObjSamplerState, input.texCoord);
+	return float4(1.0f,0.0f,0.0f,1.0f);
 }

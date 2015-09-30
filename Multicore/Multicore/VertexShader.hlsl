@@ -36,7 +36,7 @@ VOut VShader( VertexInputType input,uint instanceID : SV_InstanceID)
 
 	output.texCoord = input.texCoord;
 	//input.position.y += input.position.y * sin(time);
-	input.position = mul(input.position, instances[instanceID].translationMatrix);
+	//input.position = mul(input.position, instances[instanceID].translationMatrix);
 	//output.color = input.color * instances[instanceID].colorInstance;
 	output.position = mul(input.position, worldMatrix);
 	output.position = mul(output.position, viewMatrix);

@@ -129,32 +129,26 @@ void WindowCreator::UpdateUserCMD()
 	if (keyboardState[DIK_A] & 0x80)
 	{
 		mCurrentCmd.a = true;
-		cout << "a detected";
 	}
 	if (keyboardState[DIK_D] & 0x80)
 	{
 		mCurrentCmd.d = true;
-		cout << "d detected";
 	}
 	if (keyboardState[DIK_W] & 0x80)
 	{
 		mCurrentCmd.w = true;
-		cout << "w detected";
 	}
 	if (keyboardState[DIK_S] & 0x80)
 	{
 		mCurrentCmd.s = true;
-		cout << "s detected";
 	}
 	if ((mouseCurrState.lX != MouseLastState.lX) || (mouseCurrState.lY != MouseLastState.lY))
 	{
 		mCurrentCmd.mouseX += mouseCurrState.lX;
 
-		mCurrentCmd.mouseY += mouseCurrState.lY * 0.001f;
+		mCurrentCmd.mouseY += mouseCurrState.lY;
 
 		MouseLastState = mouseCurrState;
-		cout << mCurrentCmd.mouseX;
-		cout << mCurrentCmd.mouseY;
 	}
 
 	return;

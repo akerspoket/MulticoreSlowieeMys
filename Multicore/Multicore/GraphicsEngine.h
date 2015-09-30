@@ -32,9 +32,9 @@ struct Vertex
 
 struct MatrixBufferType
 {
-	XMMATRIX world;
-	XMMATRIX view;
-	XMMATRIX projection;
+	XMFLOAT4X4 world;
+	XMFLOAT4X4 view;
+	XMFLOAT4X4 projection;
 };
 
 struct MovementBufferType
@@ -97,10 +97,11 @@ private:
 	ID3D11PixelShader* mPixelShader;
 	VertexShaderComponents* mVertexShader = new VertexShaderComponents;
 	vector< ID3D11Buffer*> mBuffers; //int id
-	MatrixBufferType tBufferInfo;
+	MatrixBufferType mMatrixBufferInfo;
 
 	CameraManager* mCamerManager;
 	int mIndexBufferID;
+	int mVertexBufferIDVS;
 	struct ConstantBufferType
 	{
 		int bufferID;
@@ -108,13 +109,16 @@ private:
 	};	
 
 	ConstantBufferType mWVPBufferID;
+	ConstantBufferType mWVPBufferIDVS;
 	ConstantBufferType mInstanceBufferID;
 	ID3D11Buffer* mMatrixBuffer;
 	ID3D11Buffer* mVertexBufferID;
+	ID3D11Buffer* mIndexBufferHandle;
 	ID3D11UnorderedAccessView* mBackBufferUAV;
 	ID3D11UnorderedAccessView* mVertexBufferUAV;
 	ID3D11UnorderedAccessView* mMatrixBufferUAV;
 	ID3D11ShaderResourceView* mResourceView;
+	ID3D11ShaderResourceView* mIndexResourceView;
 	ID3D11ShaderResourceView* mMatrixResourceView;
 	
 	ID3D11ShaderResourceView* mCubesTexture;
