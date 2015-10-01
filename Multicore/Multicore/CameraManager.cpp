@@ -62,11 +62,11 @@ void CameraManager::HandleUserCMD(float pDT,UserCMD pUserCMD)
 	float speed = 0.001f * pDT;
 	if (pUserCMD.a)
 	{
-		mMoveLeftRight += speed;
+		mMoveLeftRight -= speed;
 	}
 	if (pUserCMD.d)
 	{
-		mMoveLeftRight -= speed;
+		mMoveLeftRight += speed;
 	}
 	if (pUserCMD.s)
 	{
@@ -99,7 +99,8 @@ XMFLOAT4X4 CameraManager::GetView()
 	XMFLOAT4X4 rMatrix;
 	XMMATRIX tView = XMLoadFloat4x4(&mViewMatrix);
 
-	tView = XMMatrixInverse(&XMMatrixDeterminant(tView), tView);	tView = XMMatrixTranspose(tView);
+	tView = XMMatrixInverse(&XMMatrixDeterminant(tView), tView);	
+	tView = XMMatrixTranspose(tView);
 	XMStoreFloat4x4(&rMatrix, ( tView));
 	return rMatrix;
 }

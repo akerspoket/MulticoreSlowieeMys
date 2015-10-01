@@ -28,6 +28,13 @@ struct Vertex
 {
 	float x, y, z;
 	float texcoord[2];
+	float nx,ny,nz;
+};
+
+struct Sphere
+{
+	XMFLOAT3 origin;
+	float radius;
 };
 
 struct MatrixBufferType
@@ -114,12 +121,16 @@ private:
 	ID3D11Buffer* mMatrixBuffer;
 	ID3D11Buffer* mVertexBufferID;
 	ID3D11Buffer* mIndexBufferHandle;
+	ID3D11Buffer* mSphereBufferHandle;
+	ID3D11Buffer* mPointlightBufferHandle;
 	ID3D11UnorderedAccessView* mBackBufferUAV;
 	ID3D11UnorderedAccessView* mVertexBufferUAV;
 	ID3D11UnorderedAccessView* mMatrixBufferUAV;
 	ID3D11ShaderResourceView* mResourceView;
 	ID3D11ShaderResourceView* mIndexResourceView;
 	ID3D11ShaderResourceView* mMatrixResourceView;
+	ID3D11ShaderResourceView* mSphereResourceView;
+	ID3D11ShaderResourceView* mPointlightResourceView;
 	
 	ID3D11ShaderResourceView* mCubesTexture;
 	ID3D11SamplerState* mCubesTexSamplerState;

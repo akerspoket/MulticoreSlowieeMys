@@ -100,36 +100,36 @@ void GraphicsEngine::InitGraphics()
 {
 	Vertex OurVertices[] =
 	{
-		{ -0.5f, 0.5f, -0.5f, 0.0f, 0.0f},
-		{ -0.5f, -0.5, -0.5f, 0.0f, 1.0f}, //Framsidan
-		{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f},
-		{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f},
+		{ -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0.0f,0.0f,-1.0f},
+		{ -0.5f, -0.5, -0.5f, 0.0f, 1.0f, 0.0f,0.0f,-1.0f }, //Framsidan
+		{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,0.0f,-1.0f },
+		{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,0.0f,-1.0f },
 
-		{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f }, //4
-		{ -0.5f, -0.5, 0.5f, 1.0f, 1.0f }, //5  Baksidan
-		{ 0.5f, -0.5f, 0.5f, 0.0f, 1.0f }, //6
-		{ 0.5f, 0.5f, 0.5f, 0.0f, 0.0f },  //7
+		{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f , 0.0f,0.0f,1.0f }, //4
+		{ -0.5f, -0.5, 0.5f, 1.0f, 1.0f , 0.0f,0.0f,1.0f }, //5  Baksidan
+		{ 0.5f, -0.5f, 0.5f, 0.0f, 1.0f , 0.0f,0.0f,1.0f }, //6
+		{ 0.5f, 0.5f, 0.5f, 0.0f, 0.0f  , 0.0f,0.0f,1.0f },  //7
 
 		
-		{ -0.5f, 0.5f, -0.5f, 0.0f,0.0f},  //ovanpå 8
-		{ -0.5f, 0.5, 0.5f, 0.0f, 1.0f},   //// 9
-		{ 0.5f, 0.5f, 0.5f, 1.0f, 1.0f},   ////10
-		{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f },  //11
+		{ -0.5f, 0.5f, -0.5f, 0.0f,0.0f, 0.0f,1.0f,0.0f },  //ovanpå 8
+		{ -0.5f, 0.5, 0.5f, 0.0f, 1.0f, 0.0f,1.0f,0.0f },   //// 9
+		{ 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.0f,1.0f,0.0f },   ////10
+		{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f , 0.0f,1.0f,0.0f },  //11
 
-		{ -0.5f, -0.5f, 0.5f, 0.0f,0.0f},  //under 12
-		{ -0.5f, -0.5, -0.5f, 0.0f, 1.0f },   //// 13
-		{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f },   ////14
-		{ 0.5f, -0.5f, 0.5f, 1.0f, 0.0f },  //15
+		{ -0.5f, -0.5f, 0.5f, 0.0f,0.0f, 0.0f,-1.0f,0.0f },  //under 12
+		{ -0.5f, -0.5, -0.5f, 0.0f, 1.0f , 0.0f,-1.0f,0.0f },   //// 13
+		{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f , 0.0f,-1.0f,0.0f },   ////14
+		{ 0.5f, -0.5f, 0.5f, 1.0f, 0.0f , 0.0f,-1.0f,0.0f },  //15
 
-		{ -0.5f, 0.5f, -0.5f, 0.0f,0.0f},  //vänster 16
-		{ -0.5f, -0.5, -0.5f, 0.0f, 1.0f },   //// 17
-		{ -0.5f, -0.5f, 0.5f, 1.0f, 1.0f },   ////18
-		{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f },  //19
+		{ -0.5f, 0.5f, -0.5f, 0.0f,0.0f, -1.0f,0.0f,0.0f },  //vänster 16
+		{ -0.5f, -0.5, -0.5f, 0.0f, 1.0f, -1.0f,0.0f,0.0f },   //// 17
+		{ -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, -1.0f,0.0f,0.0f },   ////18
+		{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -1.0f,0.0f,0.0f },  //19
 
-		{ 0.5f, 0.5f, 0.5f, 0.0f,0.0f },  //höger 20
-		{ 0.5f, -0.5, 0.5f, 0.0f, 1.0f },   //// 21
-		{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f },   ////22
-		{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f },  //23
+		{ 0.5f, 0.5f, 0.5f, 0.0f,0.0f , 1.0f,0.0f,0.0f },  //höger 20
+		{ 0.5f, -0.5, 0.5f, 0.0f, 1.0f , 1.0f,0.0f,0.0f },   //// 21
+		{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f , 1.0f,0.0f,0.0f },   ////22
+		{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f , 1.0f,0.0f,0.0f },  //23
 	};
 
 	int OurIndices[] =
@@ -203,13 +203,62 @@ void GraphicsEngine::InitGraphics()
 	D3D11_SUBRESOURCE_DATA InitDataIndex;
 	InitDataIndex.pSysMem = OurIndices;
 	res = dev->CreateBuffer(&vbd, &InitDataIndex, &mIndexBufferHandle);
-
+	
 	ZeroMemory(&rvDesc, sizeof(rvDesc));
 	rvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
 	rvDesc.BufferEx.FirstElement = 0;
 	rvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	rvDesc.BufferEx.NumElements = vbd.ByteWidth / vbd.StructureByteStride;
 	res = dev->CreateShaderResourceView(mIndexBufferHandle, &rvDesc, &mIndexResourceView);
+
+	//FOR SPHERE PRIMITIV
+	Sphere tSphere;
+	tSphere.origin = XMFLOAT3(-5.0f, 0.0f, 0.0f);
+	tSphere.radius = 0.5f;
+
+	ZeroMemory(&vbd, sizeof(vbd));
+	//vbd.Usage = D3D11_USAGE_DYNAMIC;
+	vbd.ByteWidth = sizeof(tSphere);
+	vbd.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	//vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	vbd.StructureByteStride = sizeof(tSphere);
+	D3D11_SUBRESOURCE_DATA InitDataSphere;
+	InitDataSphere.pSysMem = &tSphere;
+	res = dev->CreateBuffer(&vbd, &InitDataSphere, &mSphereBufferHandle);
+
+	ZeroMemory(&rvDesc, sizeof(rvDesc));
+	rvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+	rvDesc.BufferEx.FirstElement = 0;
+	rvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	rvDesc.BufferEx.NumElements = vbd.ByteWidth / vbd.StructureByteStride;
+	res = dev->CreateShaderResourceView(mSphereBufferHandle, &rvDesc, &mSphereResourceView);
+
+	//FOR POINTLIGHTS
+
+	XMFLOAT3 pointLightPos = XMFLOAT3(-3.0f, 0.0f, -3.0f);
+
+	ZeroMemory(&vbd, sizeof(vbd));
+	//vbd.Usage = D3D11_USAGE_DYNAMIC;
+	vbd.ByteWidth = sizeof(pointLightPos);
+	vbd.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	//vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	vbd.StructureByteStride = sizeof(pointLightPos);
+	D3D11_SUBRESOURCE_DATA InitDataPLight;
+	InitDataPLight.pSysMem = &pointLightPos;
+	res = dev->CreateBuffer(&vbd, &InitDataPLight, &mPointlightBufferHandle);
+
+	ZeroMemory(&rvDesc, sizeof(rvDesc));
+	rvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+	rvDesc.BufferEx.FirstElement = 0;
+	rvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	rvDesc.BufferEx.NumElements = vbd.ByteWidth / vbd.StructureByteStride;
+	res = dev->CreateShaderResourceView(mPointlightBufferHandle, &rvDesc, &mPointlightResourceView);
+
+
+
+
 	//FOR MATRIX BUFFER
 	ZeroMemory(&vbd, sizeof(vbd));
 	vbd.Usage = D3D11_USAGE_DYNAMIC;
@@ -277,7 +326,7 @@ void GraphicsEngine::RenderFrame(void)
 	////For compute shader draw
 	
 	SetActiveShader(ComputeShader, mComputeShader);
-	ID3D11ShaderResourceView* tRViews[] = { mResourceView ,mIndexResourceView };
+	ID3D11ShaderResourceView* tRViews[] = { mResourceView ,mIndexResourceView, mSphereResourceView, mPointlightResourceView };
 	int s = ARRAYSIZE(tRViews);
 	devcon->CSSetShaderResources(0, ARRAYSIZE(tRViews), tRViews);
 
