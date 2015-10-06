@@ -15,8 +15,10 @@ struct Ray
 {
 	float3 Origin;
 	float3 Direction;
+	float3 HitPoint;
 	float2 TexCoord;
 	float HitDistance;
+	int PrimitiveIndex;
 };
 
 cbuffer Matrices : register(b0)
@@ -32,12 +34,15 @@ StructuredBuffer<VertexInputType> vertexinput: register(t0);
 StructuredBuffer<uint> indexinput: register(t1);
 StructuredBuffer<SpherePrimitive> sphereinput: register(t2);
 StructuredBuffer<float3> pointlight : register(t3);
+Texture2D ObjTexture : register(t4);
+SamplerState ObjSamplerState : register(s0);
 #define N 800
-#define EPSILON 0.00000001
+#define EPSILON 0.00001
 
-float TriangleIntersection(float3 V1, float3 V2, float3 V3, Ray ray);
-float SphereIntersection(SpherePrimitive sphere, Ray ray);
+float TriangleIntersection(float3 V1, float3 V2, float3 V3, float3 Direction, float3 Origin);
+float SphereIntersection(SpherePrimitive sphere, float3 Direction, float3 Origin);
 void SetRayTexCoord(float3 P1, float3 P2, float3 P3, float2 T1, float2 T2, float2 T3, inout Ray ray);
+float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal); //new ray origin = hitpoint
 [numthreads(32, 32, 1)]
 void main( uint3 threadID : SV_DispatchThreadID )
 {
@@ -58,30 +63,42 @@ void main( uint3 threadID : SV_DispatchThreadID )
 	ray.TexCoord = float2(1.0f, 1.0f);
 
 
-	//Hit detection vs Triangle
+	//Hit detection vs Triangle & Sphere
 	uint length;
 	uint stride;
 	indexinput.GetDimensions(length, stride);
-	float sphereDist = SphereIntersection(sphereinput[0],  ray);
+	float sphereDist = SphereIntersection(sphereinput[0],  ray.Direction, ray.Origin);
 	if (sphereDist > 0)
 	{
 		ray.HitDistance = sphereDist;
+		ray.HitPoint = ray.Origin + ray.HitDistance * ray.Direction;
+		ray.PrimitiveIndex = -1;
 		ray.TexCoord = float2(1.0f, 0.0f);
 	}
 	for (int i = 0; i < length; i+=3)
 	{
-		float t = TriangleIntersection(vertexinput[indexinput[i]].position, vertexinput[indexinput[i+1]].position, vertexinput[indexinput[i+2]].position, ray);
+		float t = TriangleIntersection(vertexinput[indexinput[i]].position, vertexinput[indexinput[i+1]].position, vertexinput[indexinput[i+2]].position, ray.Direction, ray.Origin);
 		if (t > 0 && t < ray.HitDistance) //z should maybe be 0, dunno
-		{
-			ray.HitDistance = t;
-			ray.TexCoord = float2(0.0f, 1.0f);
+		{	
+			ray.HitDistance = t;	//If better hit calculate texcoords
+			ray.HitPoint = ray.Origin + ray.HitDistance * ray.Direction;
+			ray.PrimitiveIndex = i;
+			SetRayTexCoord(vertexinput[indexinput[i]].position, vertexinput[indexinput[i + 1]].position, vertexinput[indexinput[i + 2]].position,
+				vertexinput[indexinput[i]].texCoord, vertexinput[indexinput[i + 1]].texCoord, vertexinput[indexinput[i + 2]].texCoord,ray);
+			//And calculate light
 		}
 	}
 	output[threadID.xy] = float4(ray.TexCoord, 0.0f, 1.0f);
+	if (ray.HitDistance < 10000000) //If a hit was detected sample from texture
+	{
+		float illumination = CalculateLight(ray.HitPoint, length, vertexinput[indexinput[i]].normal);
+		output[threadID.xy] = ObjTexture.SampleLevel(ObjSamplerState, ray.TexCoord, 0) * illumination;
+	}
+	
 
 }
 
-float TriangleIntersection(float3 V1, float3 V2, float3 V3, Ray ray)
+float TriangleIntersection(float3 V1, float3 V2, float3 V3, float3 Direction, float3 Origin)
 {
 	float3 e1, e2; //Edge1, Edge2
 	float3 P, Q, T;
@@ -90,7 +107,7 @@ float TriangleIntersection(float3 V1, float3 V2, float3 V3, Ray ray)
 
 	e1 = V2 - V1;
 	e2 = V3 - V1;
-	P = cross(ray.Direction, e2);
+	P = cross(Direction, e2);
 	det = dot(e1, P);
 	if (det > -EPSILON && det < EPSILON)
 	{
@@ -98,7 +115,7 @@ float TriangleIntersection(float3 V1, float3 V2, float3 V3, Ray ray)
 	}
 	inv_det = 1.0f / det;
 
-	T = ray.Origin - V1;
+	T = Origin - V1;
 	u = dot(T, P) * inv_det;
 	if (u < 0.0f || u > 1.0f)
 	{
@@ -106,7 +123,7 @@ float TriangleIntersection(float3 V1, float3 V2, float3 V3, Ray ray)
 	}
 
 	Q = cross(T, e1);
-	v = dot(ray.Direction, Q) * inv_det;
+	v = dot(Direction, Q) * inv_det;
 	if (v < 0.0f || v + u > 1.0f)
 	{
 		return -1;
@@ -122,16 +139,21 @@ float TriangleIntersection(float3 V1, float3 V2, float3 V3, Ray ray)
 	return -1;
 }
 
-float SphereIntersection(SpherePrimitive sphere, Ray ray)
+float SphereIntersection(SpherePrimitive sphere, float3 Direction, float3 Origin)
 {
-	float b = dot(ray.Direction, ray.Origin - sphere.Origin);
-	float c = dot(ray.Origin - sphere.Origin, ray.Origin - sphere.Origin) - pow(sphere.Radius, 2.0f);
+	float b = dot(Direction, Origin - sphere.Origin);
+	float c = dot(Origin - sphere.Origin, Origin - sphere.Origin) - pow(sphere.Radius, 2.0f);
 	bool hit;
 	float f = pow(b, 2.0f) - c;
 	hit = f >= 0.0f ? true : false;
 	if (hit)
 	{
-		return -b - sqrt(f);
+		float t = -b - sqrt(f);
+		if (t > EPSILON)
+		{
+			return t;
+		}
+		
 	}
 
 	return -1;
@@ -140,14 +162,46 @@ float SphereIntersection(SpherePrimitive sphere, Ray ray)
 
 void SetRayTexCoord(float3 P1, float3 P2, float3 P3, float2 T1, float2 T2, float2 T3, inout Ray ray)
 {
-	//Own calculation, might not work		//Här finns det plats för optimization, gör vectorer å normalisera istället för att bli av med totdist
-	float3 HitPoint = ray.Origin + ray.HitDistance * ray.Direction;
-	float dist1 = length(HitPoint - P1);
-	float dist2 = length(HitPoint - P2);
-	float dist3 = length(HitPoint - P3);	//Beräknar längde från träffpunkten till varje vertice
-	float totDist = dist1 + dist2 + dist3;
-	dist1 /= totDist;
-	dist2 /= totDist;
-	dist3 /= totDist;	//Delar med totDist för att få fram % av hur mycket av varje texcoord vi ska ta
-	ray.TexCoord = dist1 * T1 + dist2*T2 + dist3 * T3; //Beräknar texcoord utifrån hur långt bort ifrån varje  åunkt vi ligger
+
+	float v, w, u;
+	float3 v0 = P2 - P1, v1 = P3 - P1, v2 = ray.HitPoint - P1;
+	float d00 = dot(v0, v0);
+	float d01 = dot(v0, v1);
+	float d11 = dot(v1, v1);
+	float d20 = dot(v2, v0);
+	float d21 = dot(v2, v1);
+	float denom = d00 * d11 - d01 * d01;
+	v = (d11 * d20 - d01 * d21) / denom;
+	w = (d00 * d21 - d01 * d20) / denom;
+	u = 1.0f - v - w;
+	ray.TexCoord = u * T1 + v *T2 + w * T3; //Beräknar texcoord utifrån hur långt bort ifrån varje  åunkt vi ligger
+}
+
+float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal)
+{
+	float3 NewRayDirection = pointlight[0] - NewRayOrigin;
+	float DistanceToLight = length(NewRayDirection);
+	NewRayDirection = normalize(NewRayDirection);
+	float hitDistance = SphereIntersection(sphereinput[0], NewRayDirection, NewRayOrigin);
+	float3 normal;
+	if (hitDistance < DistanceToLight && hitDistance > 0)
+	{
+		return 0.5;
+	}
+	hitDistance = DistanceToLight + 2;
+	for (int i = 0; i < NumberOfPrimitives; i++)
+	{
+		float t = TriangleIntersection(vertexinput[indexinput[i]].position, vertexinput[indexinput[i + 1]].position, vertexinput[indexinput[i + 2]].position, NewRayDirection, NewRayOrigin);
+		if (t > 0 && t < hitDistance) //z should maybe be 0, dunno
+		{
+			hitDistance = t; 
+			if (hitDistance < DistanceToLight)
+			{
+				return 0.5;
+			}
+		}
+	}
+
+	return 1; // dot(Normal, NewRayDirection); //doesnt work proparly
+	//Dont know if we need distance between light and hit object
 }

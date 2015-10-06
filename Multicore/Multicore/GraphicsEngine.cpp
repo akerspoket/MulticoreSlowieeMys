@@ -213,8 +213,8 @@ void GraphicsEngine::InitGraphics()
 
 	//FOR SPHERE PRIMITIV
 	Sphere tSphere;
-	tSphere.origin = XMFLOAT3(-5.0f, 0.0f, 0.0f);
-	tSphere.radius = 0.5f;
+	tSphere.origin = XMFLOAT3(-2.0f, 0.0f, 0.0f);
+	tSphere.radius = 0.2f;
 
 	ZeroMemory(&vbd, sizeof(vbd));
 	//vbd.Usage = D3D11_USAGE_DYNAMIC;
@@ -236,7 +236,7 @@ void GraphicsEngine::InitGraphics()
 
 	//FOR POINTLIGHTS
 
-	XMFLOAT3 pointLightPos = XMFLOAT3(-3.0f, 0.0f, -3.0f);
+	XMFLOAT3 pointLightPos = XMFLOAT3(-7.0f, 2.0f, 2.0f);
 
 	ZeroMemory(&vbd, sizeof(vbd));
 	//vbd.Usage = D3D11_USAGE_DYNAMIC;
@@ -299,6 +299,36 @@ void GraphicsEngine::InitGraphics()
 	XMStoreFloat4x4(&tBufferInfo.projection, XMMatrixTranspose(XMMatrixPerspectiveFovLH(45.0f, SCREEN_HEIGHT / SCREEN_WIDTH, 0.1f, 100)));
 	PushToDevice(mWVPBufferIDVS.bufferID, &tBufferInfo, sizeof(tBufferInfo), mWVPBufferIDVS.reg, VertexShader);
 
+	//For texture and 
+	HRESULT hr;
+	mCubesTexture = 0;
+	hr = CreateDDSTextureFromFile(dev, L"1test.dds", nullptr, &mCubesTexture);
+	if (FAILED(hr))
+	{
+		return;
+	}
+	D3D11_SAMPLER_DESC texSamDesc;
+	texSamDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	texSamDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	texSamDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	texSamDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	texSamDesc.MipLODBias = 0;
+	texSamDesc.MaxAnisotropy = 1;
+	texSamDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	texSamDesc.BorderColor[0] = 1.0f;
+	texSamDesc.BorderColor[1] = 1.0f;
+	texSamDesc.BorderColor[2] = 1.0f;
+	texSamDesc.BorderColor[3] = 1.0f;
+	texSamDesc.MinLOD = -3.402823466e+38F; // -FLT_MAX
+	texSamDesc.MaxLOD = 3.402823466e+38F; // FLT_MAX
+
+
+	hr = dev->CreateSamplerState(&texSamDesc, &mCubesTexSamplerState);
+	if (FAILED(hr))
+	{
+		return;
+	}
+
 	SetActiveShader(VertexShader, mVertexShader);
 	SetActiveShader(PixelShader, mPixelShader);
 }
@@ -326,7 +356,11 @@ void GraphicsEngine::RenderFrame(void)
 	////For compute shader draw
 	
 	SetActiveShader(ComputeShader, mComputeShader);
-	ID3D11ShaderResourceView* tRViews[] = { mResourceView ,mIndexResourceView, mSphereResourceView, mPointlightResourceView };
+
+	//devcon->CSSetShaderResources(4, 1, &mCubesTexture);
+	devcon->CSSetSamplers(0, 1, &mCubesTexSamplerState);
+
+	ID3D11ShaderResourceView* tRViews[] = { mResourceView ,mIndexResourceView, mSphereResourceView, mPointlightResourceView, mCubesTexture };
 	int s = ARRAYSIZE(tRViews);
 	devcon->CSSetShaderResources(0, ARRAYSIZE(tRViews), tRViews);
 
@@ -358,6 +392,7 @@ bool GraphicsEngine::CreateShader(ShaderType pType, void* oShaderHandle, LPCWSTR
 		D3DCOMPILE_PREFER_FLOW_CONTROL;
 #if defined( DEBUG ) || defined(_DEBUG)
 	shaderFlags |= D3DCOMPILE_DEBUG ;
+	shaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 	ID3DBlob *tShader;
 

@@ -59,4 +59,12 @@
     <FxCompile Include="VertexShader.hlsl" />
     <FxCompile Include="ComputeShader.hlsl" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="1test.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="1test.dds">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

@@ -59,7 +59,7 @@ void CameraManager::UpdateCamera()
 }
 void CameraManager::HandleUserCMD(float pDT,UserCMD pUserCMD)
 {
-	float speed = 0.001f * pDT;
+	float speed = 0.01f * pDT;
 	if (pUserCMD.a)
 	{
 		mMoveLeftRight -= speed;
