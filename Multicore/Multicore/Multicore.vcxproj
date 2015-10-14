@@ -118,6 +118,9 @@
     <Image Include="1test.dds" />
     <Image Include="1test.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="CheckList.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

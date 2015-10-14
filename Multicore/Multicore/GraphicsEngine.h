@@ -114,6 +114,8 @@ private:
 		int bufferID;
 		int reg;
 	};	
+	vector<XMFLOAT3>pointLightPositions;
+	//XMFLOAT3 pointLightPos;
 
 	ConstantBufferType mWVPBufferID;
 	ConstantBufferType mWVPBufferIDVS;

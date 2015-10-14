@@ -1,0 +1,35 @@
+Iteration 1
+	? Generate primary rays from a camera position and orientation.
+	? Support camera interaction using keyboard and mouse input.
+	? Support ray casting of sphere primitives.
+	? Support ray casting of triangle primitives.
+	? Support a single point light source.
+Iteration 2
+	? Support up to 10 moving point lights where each light casts shadows.
+	? Support diffuse and specular lighting with light attenuation.
+	? Support multiple ray traces/bounces.
+Iteration 3 (Grade E)
+	? Support ray tracing of one OBJ triangle mesh with at least one texture material attached to it.
+	? Performance analysis showing how the following factors affect the performance:
+	o Number of threads per thread group.
+	o Screen resolution.
+	o Trace depth.
+	o Number of light sources.
+	o Number of triangles.
+
+Additions
+
+To get grade D you have to implement grade E and two of the following additions:
+	? Super sampling to hide aliasing artifacts.
+	? Scene interaction, for example picking, using GPGPU.
+	? One additional light source type.
+To get grade C you have to implement grade D and two of the following additions:
+	? Normal mapping
+	? Particle system with N-body interaction.
+	? Multiple diffuse materials per triangle object.
+To get grade B you have to implement grade C and one of the following additions:
+	? Multiple triangle objects.
+	? Morph animated triangle objects.
+To get grade A you have to implement grade B and one of the following additions:
+	? Partition the mesh into a spatial data structure that is traversed in the GPU.
+	? Skinned animated triangle objects.

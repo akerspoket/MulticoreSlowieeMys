@@ -42,11 +42,11 @@ SamplerState ObjSamplerState : register(s0);
 float TriangleIntersection(float3 V1, float3 V2, float3 V3, float3 Direction, float3 Origin);
 float SphereIntersection(SpherePrimitive sphere, float3 Direction, float3 Origin);
 void SetRayTexCoord(float3 P1, float3 P2, float3 P3, float2 T1, float2 T2, float2 T3, inout Ray ray);
-float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal); //new ray origin = hitpoint
+float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal, int LightID, int PrimitiveIndex); //new ray origin = hitpoint
 [numthreads(32, 32, 1)]
 void main( uint3 threadID : SV_DispatchThreadID )
 {
-	//Ray creation
+	//Ray creation Works 
 	float4x4 WVPMatrix = ViewMatrix;//mul(WorldMatrix, mul(ViewMatrix, ProjectionMatrix)); 
 	float inverse = 1.0f / (float(N));
 	float y = -float(2.0f * threadID.y +1.0f  - N) * inverse; //2*ty/N + 1/N -1
@@ -91,8 +91,17 @@ void main( uint3 threadID : SV_DispatchThreadID )
 	output[threadID.xy] = float4(ray.TexCoord, 0.0f, 1.0f);
 	if (ray.HitDistance < 10000000) //If a hit was detected sample from texture
 	{
-		float illumination = CalculateLight(ray.HitPoint, length, vertexinput[indexinput[i]].normal);
-		output[threadID.xy] = ObjTexture.SampleLevel(ObjSamplerState, ray.TexCoord, 0) * illumination;
+		float illumination = 0;
+	    uint lightLength;
+		uint stride;
+		pointlight.GetDimensions(lightLength, stride);
+		for (int i = 0; i < lightLength ; i++)
+		{
+			illumination += CalculateLight(ray.HitPoint, length, vertexinput[indexinput[ray.PrimitiveIndex]].normal, i, ray.PrimitiveIndex);
+
+		}
+		
+		output[threadID.xy] = ObjTexture.SampleLevel(ObjSamplerState, ray.TexCoord, 0) * clamp(illumination,0.0f,1.0f);
 	}
 	
 
@@ -177,31 +186,42 @@ void SetRayTexCoord(float3 P1, float3 P2, float3 P3, float2 T1, float2 T2, float
 	ray.TexCoord = u * T1 + v *T2 + w * T3; //Beräknar texcoord utifrån hur långt bort ifrån varje  åunkt vi ligger
 }
 
-float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal)
+float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal, int LightID, int PrimitiveIndex)
 {
-	float3 NewRayDirection = pointlight[0] - NewRayOrigin;
+	float3 NewRayDirection = pointlight[LightID] - NewRayOrigin;
 	float DistanceToLight = length(NewRayDirection);
 	NewRayDirection = normalize(NewRayDirection);
+	float PotentialIllumination = clamp(dot(Normal, NewRayDirection) / DistanceToLight, 0.0f, 1.0f);
+	if (PotentialIllumination < 0.00002f)
+	{
+		return 0.0f;
+	}
+
+
 	float hitDistance = SphereIntersection(sphereinput[0], NewRayDirection, NewRayOrigin);
-	float3 normal;
+	
 	if (hitDistance < DistanceToLight && hitDistance > 0)
 	{
-		return 0.5;
+		return 0.0f;
 	}
 	hitDistance = DistanceToLight + 2;
-	for (int i = 0; i < NumberOfPrimitives; i++)
+	for (int i = 0; i < NumberOfPrimitives; i+=3)
 	{
+		if (PrimitiveIndex == i)
+		{
+			i += 3;
+		}
 		float t = TriangleIntersection(vertexinput[indexinput[i]].position, vertexinput[indexinput[i + 1]].position, vertexinput[indexinput[i + 2]].position, NewRayDirection, NewRayOrigin);
 		if (t > 0 && t < hitDistance) //z should maybe be 0, dunno
 		{
 			hitDistance = t; 
-			if (hitDistance < DistanceToLight)
+			if (hitDistance < DistanceToLight - EPSILON)
 			{
-				return 0.5;
+				return 0.0f;
 			}
 		}
 	}
-
-	return 1; // dot(Normal, NewRayDirection); //doesnt work proparly
+	//NewRayDirection = NewRayOrigin - pointlight[0];
+	return  PotentialIllumination; //doesnt work proparly
 	//Dont know if we need distance between light and hit object
 }

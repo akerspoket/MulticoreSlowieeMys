@@ -100,7 +100,7 @@ void GraphicsEngine::InitGraphics()
 {
 	Vertex OurVertices[] =
 	{
-		{ -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0.0f,0.0f,-1.0f},
+		{ -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0.0f,0.0f,-1.0f}, //Lilla boxen
 		{ -0.5f, -0.5, -0.5f, 0.0f, 1.0f, 0.0f,0.0f,-1.0f }, //Framsidan
 		{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,0.0f,-1.0f },
 		{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,0.0f,-1.0f },
@@ -130,11 +130,42 @@ void GraphicsEngine::InitGraphics()
 		{ 0.5f, -0.5, 0.5f, 0.0f, 1.0f , 1.0f,0.0f,0.0f },   //// 21
 		{ 0.5f, -0.5f, -0.5f, 1.0f, 1.0f , 1.0f,0.0f,0.0f },   ////22
 		{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f , 1.0f,0.0f,0.0f },  //23
+
+		{ -1.5f, 1.5f, -1.5f, 0.0f, 0.0f, 0.0f,0.0f,1.0f }, //Stora boxen, Inverterade normaler då boxen ska "peka" innåt
+		{ -1.5f, -1.5, -1.5f, 0.0f, 1.0f, 0.0f,0.0f,1.0f }, //Framsidan
+		{ 1.5f, -1.5f, -1.5f, 1.0f, 1.0f, 0.0f,0.0f,1.0f },
+		{ 1.5f, 1.5f, -1.5f, 1.0f, 0.0f, 0.0f,0.0f,1.0f },
+
+		{ -1.5f, 1.5f, 1.5f, 1.0f, 0.0f , 0.0f,0.0f,-1.0f }, //4
+		{ -1.5f, -1.5, 1.5f, 1.0f, 1.0f , 0.0f,0.0f,-1.0f }, //5  Baksidan
+		{ 1.5f, -1.5f, 1.5f, 0.0f, 1.0f , 0.0f,0.0f,-1.0f }, //6
+		{ 1.5f, 1.5f, 1.5f, 0.0f, 0.0f  , 0.0f,0.0f,-1.0f },  //7
+
+
+		{ -1.5f, 1.5f, -1.5f, 0.0f,0.0f, 0.0f,-1.0f,0.0f },  //ovanpå 8
+		{ -1.5f, 1.5, 1.5f, 0.0f, 1.0f, 0.0f,-1.0f,0.0f },   //// 9
+		{ 1.5f, 1.5f, 1.5f, 1.0f, 1.0f, 0.0f,-1.0f,0.0f },   ////10
+		{ 1.5f, 1.5f, -1.5f, 1.0f, 0.0f , 0.0f,-1.0f,0.0f },  //11
+
+		{ -1.5f, -1.5f, 1.5f, 0.0f,0.0f, 0.0f,1.0f,0.0f },  //under 12
+		{ -1.5f, -1.5, -1.5f, 0.0f, 1.0f , 0.0f,1.0f,0.0f },   //// 13
+		{ 1.5f, -1.5f, -1.5f, 1.0f, 1.0f , 0.0f,1.0f,0.0f },   ////14
+		{ 1.5f, -1.5f, 1.5f, 1.0f, 0.0f , 0.0f,1.0f,0.0f },  //15
+
+		{ -1.5f, 1.5f, -1.5f, 0.0f,0.0f, 1.0f,0.0f,0.0f },  //vänster 16
+		{ -1.5f, -1.5, -1.5f, 0.0f, 1.0f, 1.0f,0.0f,0.0f },   //// 17
+		{ -1.5f, -1.5f, 1.5f, 1.0f, 1.0f, 1.0f,0.0f,0.0f },   ////18
+		{ -1.5f, 1.5f, 1.5f, 1.0f, 0.0f, 1.0f,0.0f,0.0f },  //19
+
+		{ 1.5f, 1.5f, 1.5f, 0.0f,0.0f , -1.0f,0.0f,0.0f },  //höger 20
+		{ 1.5f, -1.5, 1.5f, 0.0f, 1.0f , -1.0f,0.0f,0.0f },   //// 21
+		{ 1.5f, -1.5f, -1.5f, 1.0f, 1.0f , -1.0f,0.0f,0.0f },   ////22
+		{ 1.5f, 1.5f, -1.5f, 1.0f, 0.0f , -1.0f,0.0f,0.0f },  //23
 	};
 
 	int OurIndices[] =
 	{
-		2,1,0,
+		2,1,0, //Smal Box
 		2,0,3,
 
 		4,5,6,
@@ -151,6 +182,24 @@ void GraphicsEngine::InitGraphics()
 
 		20,21,22,
 		20,22,23,
+
+		26,25,24, //Big Box
+		26,24,27,
+
+		28,29,30,
+		28,30,31,
+
+		32,33,34,
+		32,34,35,
+
+		36,37,38,
+		36,38,39,
+
+		40,41,42,
+		40,42,43,
+
+		44,45,46,
+		44,46,47,
 	};
 	//FOR VERTEX BUFFER FOR VERTEXSHADER
 	D3D11_BUFFER_DESC bd;
@@ -213,7 +262,7 @@ void GraphicsEngine::InitGraphics()
 
 	//FOR SPHERE PRIMITIV
 	Sphere tSphere;
-	tSphere.origin = XMFLOAT3(-2.0f, 0.0f, 0.0f);
+	tSphere.origin = XMFLOAT3(-1.0f, 0.0f, 0.0f);
 	tSphere.radius = 0.2f;
 
 	ZeroMemory(&vbd, sizeof(vbd));
@@ -235,20 +284,29 @@ void GraphicsEngine::InitGraphics()
 	res = dev->CreateShaderResourceView(mSphereBufferHandle, &rvDesc, &mSphereResourceView);
 
 	//FOR POINTLIGHTS
-
-	XMFLOAT3 pointLightPos = XMFLOAT3(-7.0f, 2.0f, 2.0f);
+	pointLightPositions.push_back(XMFLOAT3(-1.5f, 0.9f, 0.0f));
+	pointLightPositions.push_back(XMFLOAT3(1.5f, 0.9f, 0.0f));
+	pointLightPositions.push_back(XMFLOAT3(0.9f, 1.5f, 0.0f));
+	pointLightPositions.push_back(XMFLOAT3(0.9f, -1.5f, 0.0f));
+	pointLightPositions.push_back(XMFLOAT3(0.0f, 0.0f, 1.5f));
+	pointLightPositions.push_back(XMFLOAT3(0.0f, 0.0f, -1.5f));
 
 	ZeroMemory(&vbd, sizeof(vbd));
-	//vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(pointLightPos);
-	vbd.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-	//vbd.CPUAccessFlags = 0;
+	vbd.Usage = D3D11_USAGE_DYNAMIC;
+	vbd.ByteWidth = sizeof(XMFLOAT3)*pointLightPositions.size();
+	vbd.BindFlags = D3D11_BIND_SHADER_RESOURCE; //| D3D11_BIND_UNORDERED_ACCESS;
+	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vbd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	vbd.StructureByteStride = sizeof(pointLightPos);
+	vbd.StructureByteStride = sizeof(XMFLOAT3);
 	D3D11_SUBRESOURCE_DATA InitDataPLight;
-	InitDataPLight.pSysMem = &pointLightPos;
+	InitDataPLight.pSysMem = pointLightPositions.data();
 	res = dev->CreateBuffer(&vbd, &InitDataPLight, &mPointlightBufferHandle);
 
+	D3D11_MAPPED_SUBRESOURCE tMS;
+	devcon->Map(mPointlightBufferHandle, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &tMS);
+	memcpy(tMS.pData, pointLightPositions.data(), sizeof(XMFLOAT3)*pointLightPositions.size());
+	devcon->Unmap(mPointlightBufferHandle, NULL);
+   //
 	ZeroMemory(&rvDesc, sizeof(rvDesc));
 	rvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
 	rvDesc.BufferEx.FirstElement = 0;
@@ -341,8 +399,19 @@ void GraphicsEngine::Update(float pDT, UserCMD pUserCMD)
 
 void GraphicsEngine::RenderFrame(void)
 {
+	static float pMove = 0.0f;
+	pMove += 0.01;
+	vector<XMFLOAT3> newLightPos;
+	newLightPos.resize(6);
+	for (size_t i = 0; i < pointLightPositions.size()-1; i++)
+	{
+		newLightPos[i] = XMFLOAT3(pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z + sin(pMove));
 
-
+	}
+	D3D11_MAPPED_SUBRESOURCE tMS;
+	devcon->Map(mPointlightBufferHandle, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &tMS);
+	memcpy(tMS.pData, newLightPos.data(), sizeof(XMFLOAT3) * newLightPos.size());
+	devcon->Unmap(mPointlightBufferHandle, NULL);
 	MatrixBufferType tBufferInfo;
 	tBufferInfo.world = mCamerManager->GetWorld();
 	tBufferInfo.view = mCamerManager->GetView();
