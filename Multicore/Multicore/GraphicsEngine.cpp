@@ -57,7 +57,7 @@ void GraphicsEngine::InitD3D(HWND hWnd)
 	pBackBuffer->Release();
 
 
-	devcon->OMSetRenderTargets(1, &backbuffer, NULL);
+	//devcon->OMSetRenderTargets(1, &backbuffer, NULL); //For Vertex Shader
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
@@ -284,12 +284,20 @@ void GraphicsEngine::InitGraphics()
 	res = dev->CreateShaderResourceView(mSphereBufferHandle, &rvDesc, &mSphereResourceView);
 
 	//FOR POINTLIGHTS
-	pointLightPositions.push_back(XMFLOAT3(-1.5f, 0.9f, 0.0f));
-	pointLightPositions.push_back(XMFLOAT3(1.5f, 0.9f, 0.0f));
-	pointLightPositions.push_back(XMFLOAT3(0.9f, 1.5f, 0.0f));
-	pointLightPositions.push_back(XMFLOAT3(0.9f, -1.5f, 0.0f));
-	pointLightPositions.push_back(XMFLOAT3(0.0f, 0.0f, 1.5f));
-	pointLightPositions.push_back(XMFLOAT3(0.0f, 0.0f, -1.5f));
+	for (int i = 0; i < 5; i++)
+	{
+		pointLightPositions.push_back(XMFLOAT3(sin(i*2 * PI/ 5) * 1, cos(i * 2 * PI / 5) * 1,0));
+	}
+	for (int i = 0; i < 5; i++)
+	{
+		pointLightPositions.push_back(XMFLOAT3(0, cos(i * 2 * PI / 5) * 1, sin(i * 2 * PI / 5) * 1));
+	}
+	//pointLightPositions.push_back(XMFLOAT3(-1.5f, 0.0f, 0.0f));
+	//pointLightPositions.push_back(XMFLOAT3(1.5f, 0.9f, 0.0f));
+	//pointLightPositions.push_back(XMFLOAT3(0.9f, 1.5f, 0.0f));
+	//pointLightPositions.push_back(XMFLOAT3(0.9f, -1.5f, 0.0f));
+	//pointLightPositions.push_back(XMFLOAT3(0.0f, 0.0f, 1.5f));
+	//pointLightPositions.push_back(XMFLOAT3(0.0f, 0.0f, -1.5f));
 
 	ZeroMemory(&vbd, sizeof(vbd));
 	vbd.Usage = D3D11_USAGE_DYNAMIC;
@@ -402,10 +410,19 @@ void GraphicsEngine::RenderFrame(void)
 	static float pMove = 0.0f;
 	pMove += 0.01;
 	vector<XMFLOAT3> newLightPos;
-	newLightPos.resize(6);
-	for (size_t i = 0; i < pointLightPositions.size()-1; i++)
+	newLightPos.resize(pointLightPositions.size());
+	float s = sin(pMove);
+	float c = cos(pMove);
+	for (size_t i = 0; i < 5; i++)
 	{
-		newLightPos[i] = XMFLOAT3(pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z + sin(pMove));
+
+		newLightPos[i] = XMFLOAT3(pointLightPositions[i].x * c - pointLightPositions[i].y * s, pointLightPositions[i].x * s + pointLightPositions[i].y * c, pointLightPositions[i].z);
+
+	}
+	for (size_t i = 5; i < 10; i++)
+	{
+
+		newLightPos[i] = XMFLOAT3(pointLightPositions[i].x , pointLightPositions[i].z * s + pointLightPositions[i].y * c, pointLightPositions[i].z * c - pointLightPositions[i].y * s);
 
 	}
 	D3D11_MAPPED_SUBRESOURCE tMS;
@@ -430,7 +447,7 @@ void GraphicsEngine::RenderFrame(void)
 	devcon->CSSetSamplers(0, 1, &mCubesTexSamplerState);
 
 	ID3D11ShaderResourceView* tRViews[] = { mResourceView ,mIndexResourceView, mSphereResourceView, mPointlightResourceView, mCubesTexture };
-	int s = ARRAYSIZE(tRViews);
+
 	devcon->CSSetShaderResources(0, ARRAYSIZE(tRViews), tRViews);
 
 	ID3D11UnorderedAccessView* uav[] = { mBackBufferUAV };

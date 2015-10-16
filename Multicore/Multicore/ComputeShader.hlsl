@@ -42,7 +42,7 @@ SamplerState ObjSamplerState : register(s0);
 float TriangleIntersection(float3 V1, float3 V2, float3 V3, float3 Direction, float3 Origin);
 float SphereIntersection(SpherePrimitive sphere, float3 Direction, float3 Origin);
 void SetRayTexCoord(float3 P1, float3 P2, float3 P3, float2 T1, float2 T2, float2 T3, inout Ray ray);
-float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal, int LightID, int PrimitiveIndex); //new ray origin = hitpoint
+float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal, int LightID, int PrimitiveIndex, float3 RayReflectionDirection); //new ray origin = hitpoint
 [numthreads(32, 32, 1)]
 void main( uint3 threadID : SV_DispatchThreadID )
 {
@@ -61,49 +61,84 @@ void main( uint3 threadID : SV_DispatchThreadID )
 	ray.HitDistance = 10000000;
 
 	ray.TexCoord = float2(1.0f, 1.0f);
-
+	ray.PrimitiveIndex = -1;
 
 	//Hit detection vs Triangle & Sphere
-	uint length;
+	uint lengthOfIndex;
 	uint stride;
-	indexinput.GetDimensions(length, stride);
-	float sphereDist = SphereIntersection(sphereinput[0],  ray.Direction, ray.Origin);
-	if (sphereDist > 0)
+	indexinput.GetDimensions(lengthOfIndex, stride);
+	float sphereDist;
+	uint lightLength;
+	pointlight.GetDimensions(lightLength, stride);
+	//sphereDist = SphereIntersection(sphereinput[0],  ray.Direction, ray.Origin);
+	//if (sphereDist > 0)
+	//{
+	//	ray.HitDistance = sphereDist;
+	//	ray.HitPoint = ray.Origin + ray.HitDistance * ray.Direction;
+	//	ray.PrimitiveIndex = -1;
+	//	ray.TexCoord = float2(1.0f, 0.0f);
+	//}
+	for (int i = 0; i < lightLength; i++)
 	{
-		ray.HitDistance = sphereDist;
-		ray.HitPoint = ray.Origin + ray.HitDistance * ray.Direction;
-		ray.PrimitiveIndex = -1;
-		ray.TexCoord = float2(1.0f, 0.0f);
-	}
-	for (int i = 0; i < length; i+=3)
-	{
-		float t = TriangleIntersection(vertexinput[indexinput[i]].position, vertexinput[indexinput[i+1]].position, vertexinput[indexinput[i+2]].position, ray.Direction, ray.Origin);
-		if (t > 0 && t < ray.HitDistance) //z should maybe be 0, dunno
-		{	
-			ray.HitDistance = t;	//If better hit calculate texcoords
-			ray.HitPoint = ray.Origin + ray.HitDistance * ray.Direction;
-			ray.PrimitiveIndex = i;
-			SetRayTexCoord(vertexinput[indexinput[i]].position, vertexinput[indexinput[i + 1]].position, vertexinput[indexinput[i + 2]].position,
-				vertexinput[indexinput[i]].texCoord, vertexinput[indexinput[i + 1]].texCoord, vertexinput[indexinput[i + 2]].texCoord,ray);
-			//And calculate light
-		}
-	}
-	output[threadID.xy] = float4(ray.TexCoord, 0.0f, 1.0f);
-	if (ray.HitDistance < 10000000) //If a hit was detected sample from texture
-	{
-		float illumination = 0;
-	    uint lightLength;
-		uint stride;
-		pointlight.GetDimensions(lightLength, stride);
-		for (int i = 0; i < lightLength ; i++)
+		SpherePrimitive lightDebugg;
+		lightDebugg.Origin = pointlight[i];
+		lightDebugg.Radius = 0.1f;
+		sphereDist = SphereIntersection(lightDebugg, ray.Direction, ray.Origin);
+		if (sphereDist > 0 && sphereDist < ray.HitDistance)
 		{
-			illumination += CalculateLight(ray.HitPoint, length, vertexinput[indexinput[ray.PrimitiveIndex]].normal, i, ray.PrimitiveIndex);
-
+			ray.HitDistance = sphereDist;
+			ray.HitPoint = ray.Origin + ray.HitDistance * ray.Direction;
+			ray.PrimitiveIndex = -1;
+			ray.TexCoord = float2(1.0f, 0.0f);
 		}
-		
-		output[threadID.xy] = ObjTexture.SampleLevel(ObjSamplerState, ray.TexCoord, 0) * clamp(illumination,0.0f,1.0f);
 	}
+	float4 finalColor = float4(0.0f, 0.0f, 0.0f,0.0f);
 	
+
+	for (int i = 0; i < 2; i++)
+	{
+		for (int i = 0; i < lengthOfIndex; i += 3)
+		{
+
+			if (ray.PrimitiveIndex == i)
+			{
+				i += 3;
+			}
+			float t = TriangleIntersection(vertexinput[indexinput[i]].position, vertexinput[indexinput[i + 1]].position, vertexinput[indexinput[i + 2]].position, ray.Direction, ray.Origin);
+			if (t > 0 && t < ray.HitDistance) //z should maybe be 0, dunno
+			{
+				ray.HitDistance = t;	//If better hit calculate texcoords
+				ray.HitPoint = ray.Origin + ray.HitDistance * ray.Direction;
+				ray.PrimitiveIndex = i;
+				SetRayTexCoord(vertexinput[indexinput[i]].position, vertexinput[indexinput[i + 1]].position, vertexinput[indexinput[i + 2]].position,
+					vertexinput[indexinput[i]].texCoord, vertexinput[indexinput[i + 1]].texCoord, vertexinput[indexinput[i + 2]].texCoord, ray);
+				//And calculate light
+			}
+		}
+		if (ray.HitDistance < 10000000) //If a hit was detected sample from texture
+		{
+			ray.Origin = ray.HitPoint;
+			float3 normal = vertexinput[indexinput[ray.PrimitiveIndex]].normal;
+			ray.Direction = reflect(ray.Direction, normal);// ray.Direction - 2 * (dot(ray.Direction, normal) / pow(dot(normal, normal), 2) * normal);
+			ray.Direction = normalize(ray.Direction);
+			ray.HitDistance = 10000000;
+			float illumination = 0;
+
+			for (int i = 0; i < lightLength; i++)
+			{
+				illumination += CalculateLight(ray.HitPoint, lengthOfIndex, vertexinput[indexinput[ray.PrimitiveIndex]].normal, i, ray.PrimitiveIndex, ray.Direction);
+			}
+			//illumination /= 2;
+			finalColor += ObjTexture.SampleLevel(ObjSamplerState, ray.TexCoord, 0) * illumination;//clamp(illumination, 0.0f, 1.0f);
+		}
+		else
+		{
+			break;
+		}
+
+	}
+
+	output[threadID.xy] = finalColor;
 
 }
 
@@ -186,12 +221,19 @@ void SetRayTexCoord(float3 P1, float3 P2, float3 P3, float2 T1, float2 T2, float
 	ray.TexCoord = u * T1 + v *T2 + w * T3; //Beräknar texcoord utifrån hur långt bort ifrån varje  åunkt vi ligger
 }
 
-float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal, int LightID, int PrimitiveIndex)
+float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal, int LightID, int PrimitiveIndex, float3 RayReflectionDirection)
 {
 	float3 NewRayDirection = pointlight[LightID] - NewRayOrigin;
 	float DistanceToLight = length(NewRayDirection);
 	NewRayDirection = normalize(NewRayDirection);
-	float PotentialIllumination = clamp(dot(Normal, NewRayDirection) / DistanceToLight, 0.0f, 1.0f);
+	float specularScalar = pow(clamp(dot(RayReflectionDirection, NewRayDirection),0.0f,1.0f),32.0f);
+	if (abs(specularScalar) > 0.99f)
+	{
+		//return specularScalar * 100.0f;
+	}
+
+
+	float PotentialIllumination = clamp(dot(Normal, NewRayDirection) / DistanceToLight, 0.0f, 1.0f) + specularScalar;
 	if (PotentialIllumination < 0.00002f)
 	{
 		return 0.0f;

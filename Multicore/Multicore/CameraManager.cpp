@@ -55,7 +55,7 @@ void CameraManager::UpdateCamera()
 
 	XMStoreFloat4x4(&mViewMatrix, XMMatrixLookAtLH(XMLoadFloat3(&mCamPos),XMLoadFloat3(&mCamTarget), XMLoadFloat3(&mCamUp)));
 	XMStoreFloat3(&mCamRight, XMVector3Normalize(XMLoadFloat3(&mCamRight)));
-	std::cout << mCamTarget.x << ", " << mCamTarget.y << ", " << mCamTarget.z << std::endl;
+
 }
 void CameraManager::HandleUserCMD(float pDT,UserCMD pUserCMD)
 {
