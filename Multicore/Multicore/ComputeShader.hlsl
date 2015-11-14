@@ -18,6 +18,7 @@ struct Ray
 	float3 HitPoint;
 	float2 TexCoord;
 	float HitDistance;
+    float TravelDistance;
 	int PrimitiveIndex;
 };
 
@@ -42,7 +43,7 @@ SamplerState ObjSamplerState : register(s0);
 float TriangleIntersection(float3 V1, float3 V2, float3 V3, float3 Direction, float3 Origin);
 float SphereIntersection(SpherePrimitive sphere, float3 Direction, float3 Origin);
 void SetRayTexCoord(float3 P1, float3 P2, float3 P3, float2 T1, float2 T2, float2 T3, inout Ray ray);
-float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal, int LightID, int PrimitiveIndex, float3 RayReflectionDirection); //new ray origin = hitpoint
+float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal, int LightID, int PrimitiveIndex, float3 RayReflectionDirection, float TravelDistance, inout float specular); //new ray origin = hitpoint
 [numthreads(32, 32, 1)]
 void main( uint3 threadID : SV_DispatchThreadID )
 {
@@ -59,6 +60,7 @@ void main( uint3 threadID : SV_DispatchThreadID )
 	float3 pixelPosition = mul(float4(x, y, z, 1.0f), WVPMatrix).xyz;
 	ray.Direction = normalize(pixelPosition - ray.Origin);
 	ray.HitDistance = 10000000;
+    ray.TravelDistance = 0.0f;
 
 	ray.TexCoord = float2(1.0f, 1.0f);
 	ray.PrimitiveIndex = -1;
@@ -70,6 +72,7 @@ void main( uint3 threadID : SV_DispatchThreadID )
 	float sphereDist;
 	uint lightLength;
 	pointlight.GetDimensions(lightLength, stride);
+    lightLength = 2; //Number of lights to be used
 	//sphereDist = SphereIntersection(sphereinput[0],  ray.Direction, ray.Origin);
 	//if (sphereDist > 0)
 	//{
@@ -92,10 +95,10 @@ void main( uint3 threadID : SV_DispatchThreadID )
 			ray.TexCoord = float2(1.0f, 0.0f);
 		}
 	}
-	float4 finalColor = float4(0.0f, 0.0f, 0.0f,0.0f);
+	float4 finalColor = float4(0.0f, 0.0f, 0.0f,1.0f);
 	
 
-	for (int i = 0; i < 2; i++)
+	for (int j = 0; j < 2; j++)
 	{
 		for (int i = 0; i < lengthOfIndex; i += 3)
 		{
@@ -112,24 +115,36 @@ void main( uint3 threadID : SV_DispatchThreadID )
 				ray.PrimitiveIndex = i;
 				SetRayTexCoord(vertexinput[indexinput[i]].position, vertexinput[indexinput[i + 1]].position, vertexinput[indexinput[i + 2]].position,
 					vertexinput[indexinput[i]].texCoord, vertexinput[indexinput[i + 1]].texCoord, vertexinput[indexinput[i + 2]].texCoord, ray);
-				//And calculate light
+                if (j > 0) //For bounces, this if have no divergence, all warp threads will have i > 0 at the same time
+                {
+                    ray.TravelDistance += ray.HitDistance;
+                }
 			}
 		}
-		if (ray.HitDistance < 10000000) //If a hit was detected sample from texture
+		if (ray.HitDistance < 10000000 && ray.PrimitiveIndex != -1) //If a hit was detected sample from texture
 		{
 			ray.Origin = ray.HitPoint;
 			float3 normal = vertexinput[indexinput[ray.PrimitiveIndex]].normal;
 			ray.Direction = reflect(ray.Direction, normal);// ray.Direction - 2 * (dot(ray.Direction, normal) / pow(dot(normal, normal), 2) * normal);
 			ray.Direction = normalize(ray.Direction);
-			ray.HitDistance = 10000000;
+			ray.HitDistance = 100000000;
 			float illumination = 0;
+            int lightsHit = 0;
+            float specular = 0.0f;
+        
 
-			for (int i = 0; i < lightLength; i++)
-			{
-				illumination += CalculateLight(ray.HitPoint, lengthOfIndex, vertexinput[indexinput[ray.PrimitiveIndex]].normal, i, ray.PrimitiveIndex, ray.Direction);
-			}
-			//illumination /= 2;
-			finalColor += ObjTexture.SampleLevel(ObjSamplerState, ray.TexCoord, 0) * illumination;//clamp(illumination, 0.0f, 1.0f);
+            for (int i = 0; i < lightLength; i++)
+            {
+                float addedIllumination = CalculateLight(ray.HitPoint, lengthOfIndex, vertexinput[indexinput[ray.PrimitiveIndex]].normal, i, ray.PrimitiveIndex, ray.Direction, ray.TravelDistance, specular);
+                if (addedIllumination > 0)
+                {
+                    lightsHit++;
+                }
+                illumination += addedIllumination;
+            }
+            //illumination /= lightsHit;
+            finalColor += ObjTexture.SampleLevel(ObjSamplerState, ray.TexCoord, 0) * clamp(illumination, 0.0f, 1.0f) + specular;
+            
 		}
 		else
 		{
@@ -221,31 +236,28 @@ void SetRayTexCoord(float3 P1, float3 P2, float3 P3, float2 T1, float2 T2, float
 	ray.TexCoord = u * T1 + v *T2 + w * T3; //Beräknar texcoord utifrån hur långt bort ifrån varje  åunkt vi ligger
 }
 
-float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal, int LightID, int PrimitiveIndex, float3 RayReflectionDirection)
+float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal, int LightID, int PrimitiveIndex, float3 RayReflectionDirection, float TravelDistance, inout float specular)
 {
 	float3 NewRayDirection = pointlight[LightID] - NewRayOrigin;
-	float DistanceToLight = length(NewRayDirection);
+	float DistanceToLight = length(NewRayDirection) + TravelDistance;
 	NewRayDirection = normalize(NewRayDirection);
 	float specularScalar = pow(clamp(dot(RayReflectionDirection, NewRayDirection),0.0f,1.0f),32.0f);
-	if (abs(specularScalar) > 0.99f)
-	{
-		//return specularScalar * 100.0f;
-	}
+    
 
 
-	float PotentialIllumination = clamp(dot(Normal, NewRayDirection) / DistanceToLight, 0.0f, 1.0f) + specularScalar;
-	if (PotentialIllumination < 0.00002f)
+	float PotentialIllumination = clamp(dot(Normal, NewRayDirection) / DistanceToLight, 0.0f, 1.0f);
+	if (PotentialIllumination < 0.00002f) //if the potential light is very low return 0 without checking for shadows
 	{
 		return 0.0f;
 	}
 
-
-	float hitDistance = SphereIntersection(sphereinput[0], NewRayDirection, NewRayOrigin);
-	
-	if (hitDistance < DistanceToLight && hitDistance > 0)
-	{
-		return 0.0f;
-	}
+    float hitDistance = 100000000.0f;
+	//float hitDistance = SphereIntersection(sphereinput[0], NewRayDirection, NewRayOrigin);
+	//
+	//if (hitDistance < DistanceToLight && hitDistance > 0)
+	//{
+	//	return 0.0f;
+	//}
 	hitDistance = DistanceToLight + 2;
 	for (int i = 0; i < NumberOfPrimitives; i+=3)
 	{
@@ -263,6 +275,7 @@ float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal,
 			}
 		}
 	}
+    specular += specularScalar;
 	//NewRayDirection = NewRayOrigin - pointlight[0];
 	return  PotentialIllumination; //doesnt work proparly
 	//Dont know if we need distance between light and hit object

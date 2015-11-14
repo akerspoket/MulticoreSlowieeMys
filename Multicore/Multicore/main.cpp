@@ -1,5 +1,4 @@
 #include <iostream>
-#include <SDL2\SDL.h>
 #include <windows.h>
 #include <windowsx.h>
 #include "GraphicsEngine.h"
@@ -11,7 +10,6 @@ int main(int argc, char* args[])
 {
 	std::cout << "Starting project - Multicore";
 	//Create window pointer
-	SDL_Window* window = NULL;
 	WindowCreator* windowCreator = new WindowCreator();
 	windowCreator->WinMain(0, 0, 0,1);
 	//&Initialize SDL

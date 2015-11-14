@@ -14,6 +14,7 @@
 #include "DDSTextureLoader.h"
 #include "Globals.h"
 #include "CameraManager.h"
+#include "D3D11Timer.h"
 
 #ifdef DEBUG
 	#include <iostream>
@@ -136,5 +137,9 @@ private:
 	
 	ID3D11ShaderResourceView* mCubesTexture;
 	ID3D11SamplerState* mCubesTexSamplerState;
+
+    //Timing
+    D3D11Timer* mTimer;
+    HWND mWindow;
 };
 

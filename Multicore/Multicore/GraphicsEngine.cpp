@@ -17,6 +17,7 @@ GraphicsEngine::~GraphicsEngine()
 
 void GraphicsEngine::InitD3D(HWND hWnd) 
 {
+    mWindow = hWnd;
 	// create a struct to hold information about the swap chain
 	DXGI_SWAP_CHAIN_DESC scd;
 
@@ -69,6 +70,7 @@ void GraphicsEngine::InitD3D(HWND hWnd)
 	viewport.MaxDepth = 1.0f;
 
 	devcon->RSSetViewports(1, &viewport);
+    mTimer = new D3D11Timer(dev, devcon);
 }
 
 void GraphicsEngine::CleanD3D()
@@ -457,7 +459,10 @@ void GraphicsEngine::RenderFrame(void)
 	mMatrixBufferInfo.projection = mCamerManager->GetProjection();
 	PushToDevice(mWVPBufferID.bufferID, &mMatrixBufferInfo, sizeof(mMatrixBufferInfo),mWVPBufferID.reg, ComputeShader);
 
-	devcon->Dispatch(25, 25, 1);
+    mTimer->Start();
+	devcon->Dispatch(25, 25, 1); //Call to the computeshader for raytracing
+    mTimer->Stop();
+
 	SetActiveShader(ComputeShader, nullptr);
 	ID3D11ShaderResourceView* tRemoveRViews[] = { nullptr };
 	devcon->CSSetShaderResources(0, ARRAYSIZE(tRemoveRViews), tRemoveRViews);
@@ -467,6 +472,15 @@ void GraphicsEngine::RenderFrame(void)
 
 	swapchain->Present(0, 0);
 	devcon->ClearRenderTargetView(backbuffer, color);
+
+    char title[256];
+    sprintf_s(
+        title,
+        sizeof(title),
+        "BTH - Raytracer - Dispatch time: %f ms",
+        mTimer->GetTime()
+        );
+    SetWindowTextA(mWindow, title);
 }
 
 bool GraphicsEngine::CreateShader(ShaderType pType, void* oShaderHandle, LPCWSTR pShaderFileName, LPCSTR pEntryPoint, ID3D11InputLayout** oInputLayout, D3D11_INPUT_ELEMENT_DESC pInputDescription[])

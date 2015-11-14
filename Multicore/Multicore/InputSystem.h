@@ -1,5 +1,4 @@
 #pragma once
-#include <SDL2\SDL.h>
 #include <vector>
 
 class InputSystem
@@ -23,6 +22,6 @@ public:
 	};
 
 	UserCmd mUserCmd;
-	const Uint8* mKeyState;
+	
 };
 

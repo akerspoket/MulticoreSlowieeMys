@@ -100,15 +100,15 @@ int WINAPI WindowCreator::WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 
 		}
 		else
 		{
-			__int64 currTimeStamp = 0;
-			QueryPerformanceCounter((LARGE_INTEGER*)&currTimeStamp);
-			float dt = float((currTimeStamp - prevTimeStamp) * secsPerCnt);
+			//__int64 currTimeStamp = 0;
+			//QueryPerformanceCounter((LARGE_INTEGER*)&currTimeStamp);
+			//float dt = float((currTimeStamp - prevTimeStamp) * secsPerCnt);
 
-			wchar_t title[100];
+			//wchar_t title[100];
 		
-			swprintf(title, sizeof(title), L"DT: %f", 1/dt);
-			SetWindowText(hWnd, title);
-			prevTimeStamp = currTimeStamp;
+			//swprintf(title, sizeof(title), L"DT: %f", 1/dt);
+			//SetWindowText(hWnd, title);
+			//prevTimeStamp = currTimeStamp;
 			//GAME CODE
 			UpdateUserCMD();
 			mGraphicsEngine->Update(1.0f, mCurrentCmd);
