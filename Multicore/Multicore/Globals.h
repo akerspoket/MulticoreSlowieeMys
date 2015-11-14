@@ -1,6 +1,6 @@
 #pragma once
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 800
+#define SCREEN_WIDTH 800.0f
+#define SCREEN_HEIGHT 800.0f
 #define PI 3.14159265f
 
 struct UserCMD

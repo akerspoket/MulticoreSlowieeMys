@@ -99,7 +99,9 @@ private:
 	int CreateBuffer(D3D11_BUFFER_DESC pBufferDescription, void* pInitialData);
 	bool PushToDevice(int pBufferID, void* pDataStart, unsigned int pSize);
 	bool PushToDevice(int pBufferID, void* pDataStart, unsigned int pSize, unsigned int pRegister, ShaderType pType);
-
+    void CreateBox(float posx, float posy, float posz, float size, int boxNR, int normalDirection);
+    vector<Vertex>Boxes;
+    vector<int>BoxIndices;
 	//Variables
 	ID3D11ComputeShader* mComputeShader;
 	ID3D11PixelShader* mPixelShader;

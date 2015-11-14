@@ -98,6 +98,78 @@ void GraphicsEngine::InitPipeline()
 	CreateShader(VertexShader, &mVertexShader->ShaderHandle, L"VertexShader.hlsl", "VShader", &mVertexShader->InputLayout, ied);
 }
 
+void GraphicsEngine::CreateBox(float posx, float posy, float posz, float size, int boxNR, int normalDirection)
+{
+    Boxes.push_back({posx -size, posy + size,posz -size, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f *normalDirection   });
+    Boxes.push_back({posx -size, posy  - size,posz -size, 0.0f, 1.0f, 0.0f,0.0f,-1.0f  *normalDirection  }); //Framsidan
+    Boxes.push_back({posx +size, posy -size,posz -size, 1.0f, 1.0f, 0.0f,0.0f,-1.0f   *normalDirection  });
+    Boxes.push_back({posx +size, posy +size, posz -size, 1.0f, 0.0f, 0.0f,0.0f,-1.0f  *normalDirection  });
+                                                                                      
+    Boxes.push_back({posx -size, posy  +size,posz +size, 1.0f, 0.0f , 0.0f,0.0f,1.0f   *normalDirection  }); //4
+    Boxes.push_back({posx -size, posy  - size,posz +size, 1.0f, 1.0f , 0.0f,0.0f,1.0f  *normalDirection   }); //5  Baksidan
+    Boxes.push_back({posx +size, posy -size,posz +size, 0.0f, 1.0f , 0.0f,0.0f,1.0f   *normalDirection  }); //6
+    Boxes.push_back({posx +size, posy +size, posz +size, 0.0f, 0.0f  , 0.0f,0.0f,1.0f *normalDirection   });  //7
+                                     
+    Boxes.push_back({posx -size, posy  +size,posz -size, 0.0f,0.0f, 0.0f,   normalDirection * 1.0f,0.0f       });  //ovanpå 8
+    Boxes.push_back({posx -size, posy + size, posz +size, 0.0f, 1.0f, 0.0f, normalDirection * 1.0f,0.0f     });   //// 9
+    Boxes.push_back({posx +size, posy +size, posz +size, 1.0f, 1.0f, 0.0f, normalDirection * 1.0f,0.0f     });   ////10
+    Boxes.push_back({posx +size, posy +size, posz -size, 1.0f, 0.0f , 0.0f,normalDirection *1.0f,0.0f    });  //11
+                                                                           
+    Boxes.push_back({posx -size, posy  -size,posz +size, 0.0f,0.0f, 0.0f,   normalDirection * -1.0f,0.0f       });  //under 12
+    Boxes.push_back({posx -size, posy  - size,posz -size, 0.0f, 1.0f , 0.0f,normalDirection *-1.0f,0.0f   });   //// 13
+    Boxes.push_back({posx +size, posy -size,posz -size, 1.0f, 1.0f , 0.0f, normalDirection * -1.0f,0.0f    });   ////14
+    Boxes.push_back({posx +size, posy -size,posz  +size, 1.0f, 0.0f , 0.0f,normalDirection *-1.0f,0.0f   });  //15
+                                      
+    Boxes.push_back({posx -size, posy  +size,posz -size, 0.0f,0.0f,  normalDirection * -1.0f,0.0f,0.0f      });  //vänster 16
+    Boxes.push_back({posx -size, posy  - size,posz -size, 0.0f, 1.0f,normalDirection *  -1.0f,0.0f,0.0f    });   //// 17
+    Boxes.push_back({posx -size, posy  -size,posz +size, 1.0f, 1.0f, normalDirection * -1.0f,0.0f,0.0f     });  ////18
+    Boxes.push_back({posx -size, posy  +size,posz  +size, 1.0f, 0.0f,normalDirection *  -1.0f,0.0f,0.0f    });  //19
+                                       
+    Boxes.push_back({posx +size, posy +size, posz +size, 0.0f,0.0f ,  normalDirection * 1.0f,0.0f,0.0f     });  //höger 20
+    Boxes.push_back({posx +size, posy - size, posz +size, 0.0f, 1.0f ,normalDirection *1.0f,0.0f,0.0f   });   //// 21
+    Boxes.push_back({posx +size, posy -size,posz -size, 1.0f, 1.0f ,  normalDirection * 1.0f,0.0f,0.0f     });   ////22
+    Boxes.push_back({posx +size, posy +size, posz -size, 1.0f, 0.0f , normalDirection * 1.0f,0.0f,0.0f    });  //23
+
+
+
+    BoxIndices.push_back(boxNR * 24 + 2);
+    BoxIndices.push_back(boxNR * 24 + 1);
+    BoxIndices.push_back(boxNR*24+ 0);
+    BoxIndices.push_back(boxNR*24+ 2);
+    BoxIndices.push_back(boxNR*24+ 0);
+    BoxIndices.push_back(boxNR*24+ 3);
+    BoxIndices.push_back(boxNR*24+ 4);
+    BoxIndices.push_back(boxNR*24+ 5);
+    BoxIndices.push_back(boxNR*24+ 6);
+    BoxIndices.push_back(boxNR*24+ 4);
+    BoxIndices.push_back(boxNR*24+ 6);
+    BoxIndices.push_back(boxNR*24+ 7);
+    BoxIndices.push_back(boxNR*24+ 8);
+    BoxIndices.push_back(boxNR*24+ 9);
+    BoxIndices.push_back(boxNR*24+ 10);
+    BoxIndices.push_back(boxNR*24+ 8);
+    BoxIndices.push_back(boxNR*24+ 10);    
+    BoxIndices.push_back(boxNR*24+ 11);    
+    BoxIndices.push_back(boxNR*24+ 12); 
+    BoxIndices.push_back(boxNR*24 + 13);
+    BoxIndices.push_back(boxNR*24 + 14);
+    BoxIndices.push_back(boxNR*24 + 12);
+    BoxIndices.push_back(boxNR*24 + 14);
+    BoxIndices.push_back(boxNR*24 + 15);
+    BoxIndices.push_back(boxNR*24 + 16);
+    BoxIndices.push_back(boxNR*24 + 17);
+    BoxIndices.push_back(boxNR*24 + 18);
+    BoxIndices.push_back(boxNR*24 + 16);
+    BoxIndices.push_back(boxNR*24 + 18);
+    BoxIndices.push_back(boxNR*24 + 19);
+    BoxIndices.push_back(boxNR*24 + 20);
+    BoxIndices.push_back(boxNR*24 + 21);
+    BoxIndices.push_back(boxNR*24 + 22);
+    BoxIndices.push_back(boxNR*24 + 20);
+    BoxIndices.push_back(boxNR*24 + 22);
+    BoxIndices.push_back(boxNR*24 + 23);
+}
+
 void GraphicsEngine::InitGraphics()
 {
 	Vertex OurVertices[] =
@@ -203,12 +275,31 @@ void GraphicsEngine::InitGraphics()
 		44,45,46,
 		44,46,47,
 	};
+
+    CreateBox(0, 0, 0, 0.5f, 0, 1);
+    CreateBox(0, 0, 0, 1.5f, 1, -1);
+
+    for (int i = 0; i < 24 * 2; i++)
+    {
+        XMFLOAT3 normal = XMFLOAT3(Boxes[i].nx, Boxes[i].ny, Boxes[i].nz);
+        XMStoreFloat3(&normal, XMVector3TransformNormal(XMLoadFloat3(&normal), XMMatrixRotationX(0)));
+        Boxes[i].nx = normal.x;
+        Boxes[i].ny = normal.y;
+        Boxes[i].nz = normal.z;
+        XMFLOAT3  position = XMFLOAT3(Boxes[i].x, Boxes[i].y, Boxes[i].z);
+        XMStoreFloat3(&position, XMVector3Transform(XMLoadFloat3(&position), XMMatrixRotationX(0)));
+        Boxes[i].x = position.x;
+        Boxes[i].y = position.y;
+        Boxes[i].z = position.z;
+    }
+
+
 	//FOR VERTEX BUFFER FOR VERTEXSHADER
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
 
 	bd.Usage = D3D11_USAGE_DYNAMIC;
-	bd.ByteWidth = sizeof(OurVertices);
+	bd.ByteWidth = sizeof(Vertex) * Boxes.size();
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	ID3D11Buffer* tHolder1;
@@ -219,19 +310,20 @@ void GraphicsEngine::InitGraphics()
 	}
 	mBuffers.push_back(tHolder1);
 	mVertexBufferIDVS = mBuffers.size() - 1;
-	PushToDevice(mVertexBufferIDVS, OurVertices, sizeof(OurVertices));
+	PushToDevice(mVertexBufferIDVS, Boxes.data(), sizeof(Vertex) * Boxes.size());
+
 	//FOR VERTEX BUFFER
 	ID3D11Buffer* tVB;
 	D3D11_BUFFER_DESC vbd;
 	ZeroMemory(&vbd, sizeof(vbd));
 	//vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(OurVertices);
+	vbd.ByteWidth = sizeof(Vertex) * Boxes.size();
 	vbd.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	//vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	vbd.StructureByteStride = sizeof(Vertex);
 	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = OurVertices;
+	InitData.pSysMem = Boxes.data();
 	res = dev->CreateBuffer(&vbd, &InitData, &mVertexBufferID);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC rvDesc;
@@ -246,13 +338,13 @@ void GraphicsEngine::InitGraphics()
 	//FOR INDEX BUFFER
 	ZeroMemory(&vbd, sizeof(vbd));
 	//vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(OurIndices);
+	vbd.ByteWidth = sizeof(int) * BoxIndices.size();
 	vbd.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	//vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	vbd.StructureByteStride = sizeof(int) ;
 	D3D11_SUBRESOURCE_DATA InitDataIndex;
-	InitDataIndex.pSysMem = OurIndices;
+	InitDataIndex.pSysMem = BoxIndices.data();
 	res = dev->CreateBuffer(&vbd, &InitDataIndex, &mIndexBufferHandle);
 	
 	ZeroMemory(&rvDesc, sizeof(rvDesc));
@@ -415,6 +507,7 @@ void GraphicsEngine::RenderFrame(void)
 	newLightPos.resize(pointLightPositions.size());
 	float s = sin(pMove);
 	float c = cos(pMove);
+    //newLightPos = pointLightPositions;
 	for (size_t i = 0; i < 5; i++)
 	{
 
@@ -460,7 +553,7 @@ void GraphicsEngine::RenderFrame(void)
 	PushToDevice(mWVPBufferID.bufferID, &mMatrixBufferInfo, sizeof(mMatrixBufferInfo),mWVPBufferID.reg, ComputeShader);
 
     mTimer->Start();
-	devcon->Dispatch(25, 25, 1); //Call to the computeshader for raytracing
+	devcon->Dispatch(ceilf( SCREEN_WIDTH/32.0f), ceilf(SCREEN_HEIGHT / 32.0f), 1); //Call to the computeshader for raytracing
     mTimer->Stop();
 
 	SetActiveShader(ComputeShader, nullptr);

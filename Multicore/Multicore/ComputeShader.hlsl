@@ -117,7 +117,7 @@ void main( uint3 threadID : SV_DispatchThreadID )
 					vertexinput[indexinput[i]].texCoord, vertexinput[indexinput[i + 1]].texCoord, vertexinput[indexinput[i + 2]].texCoord, ray);
                 if (j > 0) //For bounces, this if have no divergence, all warp threads will have i > 0 at the same time
                 {
-                    ray.TravelDistance += ray.HitDistance;
+                    //ray.TravelDistance += ray.HitDistance;
                 }
 			}
 		}
@@ -125,6 +125,7 @@ void main( uint3 threadID : SV_DispatchThreadID )
 		{
 			ray.Origin = ray.HitPoint;
 			float3 normal = vertexinput[indexinput[ray.PrimitiveIndex]].normal;
+            ray.Direction = normalize(ray.Direction);
 			ray.Direction = reflect(ray.Direction, normal);// ray.Direction - 2 * (dot(ray.Direction, normal) / pow(dot(normal, normal), 2) * normal);
 			ray.Direction = normalize(ray.Direction);
 			ray.HitDistance = 100000000;
