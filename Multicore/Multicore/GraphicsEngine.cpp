@@ -464,7 +464,7 @@ void GraphicsEngine::RenderFrame(void)
     mTimer->Stop();
 
 	SetActiveShader(ComputeShader, nullptr);
-	ID3D11ShaderResourceView* tRemoveRViews[] = { nullptr };
+	ID3D11ShaderResourceView* tRemoveRViews[] = { nullptr, nullptr, nullptr, nullptr, nullptr };
 	devcon->CSSetShaderResources(0, ARRAYSIZE(tRemoveRViews), tRemoveRViews);
 	ID3D11UnorderedAccessView* tRemoveUAV[] = { nullptr };
 	devcon->CSSetUnorderedAccessViews(0, ARRAYSIZE(tRemoveUAV), tRemoveUAV, NULL);
