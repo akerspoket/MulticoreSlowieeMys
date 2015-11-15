@@ -511,13 +511,15 @@ void GraphicsEngine::RenderFrame(void)
 	for (size_t i = 0; i < 5; i++)
 	{
 
-		newLightPos[i] = XMFLOAT3(pointLightPositions[i].x * c - pointLightPositions[i].y * s, pointLightPositions[i].x * s + pointLightPositions[i].y * c, pointLightPositions[i].z);
+		newLightPos[i] = XMFLOAT3(pointLightPositions[i].x * c - pointLightPositions[i].y * s\
+			, pointLightPositions[i].x * s + pointLightPositions[i].y * c, pointLightPositions[i].z);
 
 	}
 	for (size_t i = 5; i < 10; i++)
 	{
 
-		newLightPos[i] = XMFLOAT3(pointLightPositions[i].x , pointLightPositions[i].z * s + pointLightPositions[i].y * c, pointLightPositions[i].z * c - pointLightPositions[i].y * s);
+		newLightPos[i] = XMFLOAT3(pointLightPositions[i].x , pointLightPositions[i].z * s\
+			+ pointLightPositions[i].y * c, pointLightPositions[i].z * c - pointLightPositions[i].y * s);
 
 	}
 	D3D11_MAPPED_SUBRESOURCE tMS;

@@ -72,7 +72,7 @@ void main( uint3 threadID : SV_DispatchThreadID )
 	float sphereDist;
 	uint lightLength;
 	pointlight.GetDimensions(lightLength, stride);
-    lightLength = 2; //Number of lights to be used
+    lightLength = 3; //Number of lights to be used
 	//sphereDist = SphereIntersection(sphereinput[0],  ray.Direction, ray.Origin);
 	//if (sphereDist > 0)
 	//{
@@ -98,7 +98,7 @@ void main( uint3 threadID : SV_DispatchThreadID )
 	float4 finalColor = float4(0.0f, 0.0f, 0.0f,1.0f);
 	
 
-	for (int j = 0; j < 2; j++)
+	for (int j = 0; j < 4; j++)
 	{
 		for (int i = 0; i < lengthOfIndex; i += 3)
 		{
@@ -143,7 +143,7 @@ void main( uint3 threadID : SV_DispatchThreadID )
                 }
                 illumination += addedIllumination;
             }
-            //illumination /= lightsHit;
+			illumination /= lightLength;///= lightsHit;
             finalColor += ObjTexture.SampleLevel(ObjSamplerState, ray.TexCoord, 0) * clamp(illumination, 0.0f, 1.0f) + specular;
             
 		}
@@ -242,7 +242,7 @@ float CalculateLight(float3 NewRayOrigin, int NumberOfPrimitives, float3 Normal,
 	float3 NewRayDirection = pointlight[LightID] - NewRayOrigin;
 	float DistanceToLight = length(NewRayDirection) + TravelDistance;
 	NewRayDirection = normalize(NewRayDirection);
-	float specularScalar = pow(clamp(dot(RayReflectionDirection, NewRayDirection),0.0f,1.0f),32.0f);
+	float specularScalar = pow(clamp(dot(RayReflectionDirection, NewRayDirection), 0.0f, 1.0f), 32.0f) / DistanceToLight;
     
 
 
